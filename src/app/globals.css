@@ -2,25 +2,68 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  --milk-yellow: #fefefe;
+  --milk-yellow-50: #ffffff;
+  --milk-yellow-100: #fefefe;
+  --milk-yellow-200: #fefdf7;
+  --milk-yellow-300: #fdfbf0;
+  --milk-yellow-400: #fcf9e8;
+  --milk-yellow-500: #faf7e0;
+  --milk-yellow-600: #f0ebd1;
+  --milk-yellow-700: #e6dfc2;
+  --milk-yellow-800: #dcd3b3;
+  --milk-yellow-900: #d2c7a4;
+}
+
+/* Force all text to be solid black with no opacity */
+.text-foreground\/70,
+.text-foreground\/80,
+.text-foreground\/60,
+.text-foreground\/50,
+.text-foreground\/40,
+.text-foreground\/30,
+.text-foreground\/20,
+.text-foreground\/10 {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Override any faded colors */
+.text-gray-400,
+.text-gray-500,
+.text-gray-600,
+.text-gray-700,
+.text-slate-400,
+.text-slate-500,
+.text-slate-600,
+.text-slate-700 {
+  color: #000000 !important;
+  opacity: 1 !important;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-milk-yellow: var(--milk-yellow);
+  --color-milk-yellow-50: var(--milk-yellow-50);
+  --color-milk-yellow-100: var(--milk-yellow-100);
+  --color-milk-yellow-200: var(--milk-yellow-200);
+  --color-milk-yellow-300: var(--milk-yellow-300);
+  --color-milk-yellow-400: var(--milk-yellow-400);
+  --color-milk-yellow-500: var(--milk-yellow-500);
+  --color-milk-yellow-600: var(--milk-yellow-600);
+  --color-milk-yellow-700: var(--milk-yellow-700);
+  --color-milk-yellow-800: var(--milk-yellow-800);
+  --color-milk-yellow-900: var(--milk-yellow-900);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
