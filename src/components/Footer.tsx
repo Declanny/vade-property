@@ -1,26 +1,27 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
 
 const footerLinks = {
   company: [
-    { name: "About Us", href: "#about" },
-    { name: "Our Team", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "News", href: "#" },
+    { name: "About Us", href: "/about" },
+    { name: "Our Team", href: "/about#team" },
+    { name: "Careers", href: "/careers" },
+    { name: "Press", href: "/press" },
   ],
-  services: [
-    { name: "Property Search", href: "#services" },
-    { name: "Property Management", href: "#services" },
-    { name: "Market Analysis", href: "#services" },
-    { name: "Legal Services", href: "#services" },
+  properties: [
+    { name: "Browse Properties", href: "/properties" },
+    { name: "Featured Listings", href: "/properties?featured=true" },
+    { name: "Verified Properties", href: "/properties?verified=true" },
+    { name: "List Your Property", href: "/list-property" },
   ],
   support: [
-    { name: "Help Center", href: "#" },
-    { name: "Contact Us", href: "#contact" },
-    { name: "Privacy Policy", href: "#" },
-    { name: "Terms of Service", href: "#" },
+    { name: "Help Center", href: "/faq" },
+    { name: "Contact Us", href: "/contact" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms & Conditions", href: "/terms" },
   ],
 };
 
@@ -40,23 +41,26 @@ export default function Footer() {
           >
             <h3 className="font-serif font-bold text-2xl mb-4 text-white">Vade Property</h3>
             <p className="text-white mb-6 leading-relaxed">
-              Your trusted partner in real estate excellence. We help you find the perfect property
-              and make your real estate dreams a reality.
+              Your trusted platform for secure, lawyer-verified property rentals in Nigeria. Find your perfect home with flexible payment plans and peace of mind.
             </p>
 
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="flex items-center text-white">
-                <Phone className="w-4 h-4 mr-3" />
-                <span>+1 (555) 123-4567</span>
+                <Phone className="w-4 h-4 mr-3 flex-shrink-0" />
+                <a href="tel:+2348012345678" className="hover:text-accent transition-colors">
+                  +234 801 234 5678
+                </a>
               </div>
               <div className="flex items-center text-white">
-                <Mail className="w-4 h-4 mr-3" />
-                <span>hello@vadeproperty.com</span>
+                <Mail className="w-4 h-4 mr-3 flex-shrink-0" />
+                <a href="mailto:info@vadeproperty.com" className="hover:text-accent transition-colors">
+                  info@vadeproperty.com
+                </a>
               </div>
-              <div className="flex items-center text-white">
-                <MapPin className="w-4 h-4 mr-3" />
-                <span>123 Real Estate Ave, City, State 12345</span>
+              <div className="flex items-start text-white">
+                <MapPin className="w-4 h-4 mr-3 mt-1 flex-shrink-0" />
+                <span>15 Marina Road, Lagos Island, Lagos, Nigeria</span>
               </div>
             </div>
           </motion.div>
@@ -72,34 +76,34 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
-                    className="text-white hover:text-gray-300 transition-colors"
+                    className="text-white hover:text-accent transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </motion.div>
 
-          {/* Services Links */}
+          {/* Properties Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <h4 className="font-semibold text-lg mb-4 text-white">Services</h4>
+            <h4 className="font-semibold text-lg mb-4 text-white">Properties</h4>
             <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
+              {footerLinks.properties.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
-                    className="text-white hover:text-gray-300 transition-colors"
+                    className="text-white hover:text-accent transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -116,12 +120,12 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
-                    className="text-white hover:text-gray-300 transition-colors"
+                    className="text-white hover:text-accent transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -156,7 +160,7 @@ export default function Footer() {
           </div>
 
           <div className="text-white text-sm">
-            © 2024 Vade Property. All rights reserved.
+            © 2025 Vade Property. All rights reserved.
           </div>
         </motion.div>
       </div>

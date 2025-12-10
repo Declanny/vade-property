@@ -1,13 +1,13 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Properties from "@/components/Properties";
-import Services from "@/components/Services";
-import About from "@/components/About";
+import FeaturedProperties from "@/components/FeaturedProperties";
+import TrustFeatures from "@/components/TrustFeatures";
+import WhyChooseUs from "@/components/WhyChooseUs";
 import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <div 
+    <div
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
         backgroundImage: "url('/propertymain.avif')"
@@ -15,9 +15,9 @@ export default function Home() {
     >
       <Navbar />
       <Hero />
-      <Properties />
-      <Services />
-      <About />
+      <FeaturedProperties />
+      <TrustFeatures />
+      <WhyChooseUs />
       <Footer />
     </div>
   );

@@ -13,7 +13,7 @@ export default function Hero() {
       }}
     >
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-blue-900/30 rounded-b-[2rem]"></div>
+      <div className="absolute inset-0 bg-primary/30 rounded-b-[2rem]"></div>
       
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 z-10 h-full flex items-center">
         <motion.div
@@ -30,10 +30,10 @@ export default function Hero() {
             className="text-left max-w-4xl mb-6"
           >
             <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-3">
-              Properties in Los Angeles
+              Verified Properties in Lagos, Nigeria
             </h1>
             <p className="text-base md:text-lg text-white font-black">
-              Find the properties that appeal to you the most
+              Find lawyer-verified properties with flexible payment plans
             </p>
           </motion.div>
 
@@ -42,70 +42,70 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="bg-white rounded-xl p-2 shadow-xl max-w-5xl border border-yellow-400"
+            className="bg-white rounded-xl p-2 shadow-xl max-w-5xl border border-accent"
           >
             <div className="flex flex-col lg:flex-row gap-1">
               {/* Location Input */}
               <div className="flex-1 flex items-center px-4 py-3 border-r border-gray-200 hover:bg-gray-50 transition-colors">
                 <Home className="w-5 h-5 text-gray-500 mr-3" />
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500 mb-1 font-medium">Where are you going?</label>
+                  <label className="block text-xs text-gray-500 mb-1 font-medium">Where are you looking?</label>
                   <input
                     type="text"
-                    placeholder="Los Angeles, CA"
+                    placeholder="Lagos, Nigeria"
                     className="w-full text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
                 </div>
               </div>
 
-              {/* Check-in Date */}
+              {/* Property Type */}
+              <div className="flex-1 flex items-center px-4 py-3 border-r border-gray-200 hover:bg-gray-50 transition-colors">
+                <Home className="w-5 h-5 text-gray-500 mr-3" />
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-500 mb-1 font-medium">Property Type</label>
+                  <input
+                    type="text"
+                    placeholder="Apartment, House..."
+                    className="w-full text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* Move-in Date */}
               <div className="flex-1 flex items-center px-4 py-3 border-r border-gray-200 hover:bg-gray-50 transition-colors">
                 <Calendar className="w-5 h-5 text-gray-500 mr-3" />
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500 mb-1 font-medium">Check-in</label>
+                  <label className="block text-xs text-gray-500 mb-1 font-medium">Move-in Date</label>
                   <input
                     type="text"
-                    placeholder="Add dates"
+                    placeholder="Select date"
                     className="w-full text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
                 </div>
               </div>
 
-              {/* Check-out Date */}
-              <div className="flex-1 flex items-center px-4 py-3 border-r border-gray-200 hover:bg-gray-50 transition-colors">
-                <Calendar className="w-5 h-5 text-gray-500 mr-3" />
-                <div className="flex-1">
-                  <label className="block text-xs text-gray-500 mb-1 font-medium">Check-out</label>
-                  <input
-                    type="text"
-                    placeholder="Add dates"
-                    className="w-full text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
-                  />
-                </div>
-              </div>
-
-              {/* Guests */}
+              {/* Bedrooms */}
               <div className="flex-1 flex items-center px-4 py-3 border-r border-gray-200 hover:bg-gray-50 transition-colors">
                 <Users className="w-5 h-5 text-gray-500 mr-3" />
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500 mb-1 font-medium">Guests</label>
+                  <label className="block text-xs text-gray-500 mb-1 font-medium">Bedrooms</label>
                   <input
                     type="text"
-                    placeholder="2 adults · 1 room"
+                    placeholder="Any"
                     className="w-full text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
                 </div>
               </div>
 
               {/* Search Button */}
-              <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+              <button className="px-6 py-3 bg-accent hover:bg-accent-light text-white rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
                 <Search className="w-5 h-5" />
                 Search
               </button>
             </div>
           </motion.div>
 
-          {/* Work Travel Checkbox */}
+          {/* Verified Only Checkbox */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -114,11 +114,11 @@ export default function Hero() {
           >
             <input
               type="checkbox"
-              id="work-travel"
-              className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 mr-2"
+              id="verified-only"
+              className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary mr-2"
             />
-            <label htmlFor="work-travel" className="text-sm font-medium">
-              I&apos;m travelling for work
+            <label htmlFor="verified-only" className="text-sm font-medium">
+              Show only lawyer-verified properties
             </label>
           </motion.div>
 

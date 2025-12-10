@@ -1,26 +1,16 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Geist, Geist_Mono } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Vade Property - Premium Real Estate",
-  description: "Discover your dream property with Vade Property",
+  title: "Vade Property - Lawyer-Verified Property Rentals",
+  description: "Find secure, lawyer-verified property rentals in Nigeria with flexible payment plans",
 };
 
 export default function RootLayout({
@@ -30,9 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${playfairDisplay.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${manrope.variable} antialiased`}>
         {children}
       </body>
     </html>
