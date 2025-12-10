@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,12 +43,14 @@ export default function Navbar() {
           isScrolled ? 'border-b border-primary-light/50' : 'border-b border-white/30'
         }`}>
           {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="font-serif font-bold text-2xl text-white tracking-wide"
-          >
-            Vade Property
-          </motion.div>
+          <Link href="/">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="cursor-pointer"
+            >
+              <Logo variant="light" size="md" />
+            </motion.div>
+          </Link>
 
           {/* Right side buttons */}
           <div className="flex items-center space-x-6">

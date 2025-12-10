@@ -9,7 +9,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Vade Property - Lawyer-Verified Property Rentals",
+  title: "TruVade - Lawyer-Verified Property Rentals",
   description: "Find secure, lawyer-verified property rentals in Nigeria with flexible payment plans",
 };
 

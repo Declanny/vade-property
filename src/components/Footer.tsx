@@ -39,7 +39,7 @@ export default function Footer() {
             viewport={{ once: true }}
             className="lg:col-span-2"
           >
-            <h3 className="font-serif font-bold text-2xl mb-4 text-white">Vade Property</h3>
+            <h3 className="font-serif font-bold text-2xl mb-4 text-white">TruVade</h3>
             <p className="text-white mb-6 leading-relaxed">
               Your trusted platform for secure, lawyer-verified property rentals in Nigeria. Find your perfect home with flexible payment plans and peace of mind.
             </p>
@@ -54,8 +54,8 @@ export default function Footer() {
               </div>
               <div className="flex items-center text-white">
                 <Mail className="w-4 h-4 mr-3 flex-shrink-0" />
-                <a href="mailto:info@vadeproperty.com" className="hover:text-accent transition-colors">
-                  info@vadeproperty.com
+                <a href="mailto:info@truvade.com" className="hover:text-accent transition-colors">
+                  info@truvade.com
                 </a>
               </div>
               <div className="flex items-start text-white">
@@ -160,7 +160,7 @@ export default function Footer() {
           </div>
 
           <div className="text-white text-sm">
-            © 2025 Vade Property. All rights reserved.
+            © 2025 TruVade. All rights reserved.
           </div>
         </motion.div>
       </div>

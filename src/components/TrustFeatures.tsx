@@ -38,7 +38,7 @@ const features = [
 
 export default function TrustFeatures() {
   return (
-    <section id="features" className="py-20 bg-transparent">
+    <section id="features" className="py-20 bg-white/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -53,7 +53,7 @@ export default function TrustFeatures() {
             Trusted Platform
           </div>
           <h2 className="font-serif text-4xl md:text-5xl font-bold text-black mb-4">
-            Why Choose Vade Property?
+            Why Choose TruVade?
           </h2>
           <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             We provide comprehensive security and convenience that protects both tenants and property owners throughout the rental process.

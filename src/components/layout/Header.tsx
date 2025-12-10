@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Home, Shield, User, LogIn } from "lucide-react";
+import { Menu, X, Shield, User, LogIn } from "lucide-react";
 import { Button } from "../ui/Button";
+import Logo from "../ui/Logo";
 import { Container } from "./Container";
 
 export const Header: React.FC = () => {
@@ -22,14 +23,8 @@ export const Header: React.FC = () => {
       <Container>
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-primary p-2 rounded-lg group-hover:bg-primary-light transition-colors">
-              <Home className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-xl font-bold text-primary">Vade Property</span>
-              <span className="text-xs text-gray-600 -mt-1">Verified by Lawyers</span>
-            </div>
+          <Link href="/" className="flex items-center group">
+            <Logo variant="colored" size="md" showTagline={false} className="group-hover:opacity-90 transition-opacity" />
           </Link>
 
           {/* Desktop Navigation */}

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { Home, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import Logo from "../ui/Logo";
 import { Container } from "./Container";
 
 export const Footer: React.FC = () => {
@@ -48,14 +49,8 @@ export const Footer: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12">
             {/* Brand Column */}
             <div className="lg:col-span-2">
-              <Link href="/" className="flex items-center gap-2 group mb-4">
-                <div className="bg-accent p-2 rounded-lg group-hover:bg-accent-light transition-colors">
-                  <Home className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-serif text-xl font-bold text-white">Vade Property</span>
-                  <span className="text-xs text-primary-light">Verified by Lawyers</span>
-                </div>
+              <Link href="/" className="inline-block mb-4">
+                <Logo variant="light" size="md" showTagline={true} />
               </Link>
               <p className="text-gray-300 text-sm mb-6">
                 Your trusted platform for secure, lawyer-verified property rentals. Find your perfect home with flexible payment plans and peace of mind.
@@ -145,7 +140,7 @@ export const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Copyright */}
             <p className="text-sm text-gray-300">
-              © {currentYear} Vade Property. All rights reserved.
+              © {currentYear} TruVade. All rights reserved.
             </p>
 
             {/* Social Links */}

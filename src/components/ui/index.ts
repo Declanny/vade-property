@@ -15,3 +15,5 @@ export type { SelectProps, SelectOption } from "./Select";
 
 export { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
 export type { ModalProps } from "./Modal";
+
+export { default as Logo } from "./Logo";

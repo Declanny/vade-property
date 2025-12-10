@@ -21,8 +21,8 @@ export default function FAQPage() {
   const faqs: FAQItem[] = [
     {
       category: "General",
-      question: "What is Vade Property?",
-      answer: "Vade Property is a lawyer-verified property rental platform in Nigeria. We ensure every property listing is legally verified by licensed lawyers, offering secure transactions and flexible payment plans for tenants and property owners.",
+      question: "What is TruVade?",
+      answer: "TruVade is a lawyer-verified property rental platform in Nigeria. We ensure every property listing is legally verified by licensed lawyers, offering secure transactions and flexible payment plans for tenants and property owners.",
     },
     {
       category: "General",
@@ -101,7 +101,7 @@ export default function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-            Find answers to common questions about Vade Property
+            Find answers to common questions about TruVade
           </p>
 
           {/* Search */}

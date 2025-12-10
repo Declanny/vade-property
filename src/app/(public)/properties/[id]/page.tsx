@@ -127,64 +127,57 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Property Stats */}
-            <Card variant="bordered" padding="lg">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <Bed className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold text-gray-900">{property.bedrooms}</div>
+            <div className="py-8 border-b border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">{property.bedrooms}</div>
                   <div className="text-sm text-gray-600">Bedrooms</div>
                 </div>
-                <div className="text-center">
-                  <Bath className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold text-gray-900">{property.bathrooms}</div>
+                <div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">{property.bathrooms}</div>
                   <div className="text-sm text-gray-600">Bathrooms</div>
                 </div>
-                <div className="text-center">
-                  <Square className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold text-gray-900">{property.area}</div>
+                <div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">{property.area}</div>
                   <div className="text-sm text-gray-600">{property.areaUnit}</div>
                 </div>
-                <div className="text-center">
-                  <Calendar className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="font-semibold text-gray-900">
-                    {property.availableFrom ? new Date(property.availableFrom).toLocaleDateString() : "Now"}
+                <div>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                    {property.availableFrom ? new Date(property.availableFrom).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : "Now"}
                   </div>
                   <div className="text-sm text-gray-600">Available</div>
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* Description */}
-            <Card variant="bordered" padding="lg">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Description</h2>
+            <div className="py-8 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
               <p className="text-gray-700 leading-relaxed">{property.description}</p>
-            </Card>
+            </div>
 
             {/* Amenities */}
-            <Card variant="bordered" padding="lg">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Amenities</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="py-8 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Amenities</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {property.amenities.map((amenity) => (
                   <div key={amenity} className="flex items-center gap-2 text-gray-700">
                     <CheckCircle className="w-5 h-5 text-success flex-shrink-0" />
-                    <span>{amenity}</span>
+                    <span className="text-sm">{amenity}</span>
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
 
             {/* Lawyer Verification */}
             {property.verified && verifyingLawyer && (
-              <Card variant="elevated" padding="lg" className="bg-success/5 border-l-4 border-success">
+              <div className="py-8 border-b border-gray-200">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-success rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                  <div className="w-12 h-12 bg-success rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                     {verifyingLawyer.name.split(" ").map((n) => n[0]).join("")}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-gray-900">Verified by Lawyer</h3>
-                      <Shield className="w-5 h-5 text-success" />
-                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">Verified by Lawyer</h3>
                     <p className="text-gray-700 mb-2">
                       This property has been verified by <strong>{verifyingLawyer.name}</strong>, a licensed lawyer on our platform.
                     </p>
@@ -193,32 +186,15 @@ export default function PropertyDetailPage() {
                     </p>
                   </div>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* Payment Plans */}
-            <div>
-              <PaymentPlanSelector
-                property={property}
-                onPlanSelect={setSelectedPaymentPlan}
-                selectedPlan={selectedPaymentPlan}
-              />
-            </div>
-
-            {/* Terms & Conditions Link */}
-            <Card variant="bordered" padding="md" className="bg-gray-50">
-              <p className="text-sm text-gray-600">
-                By applying for this property, you agree to our{" "}
-                <Link href="/terms" className="text-primary hover:underline font-medium">
-                  Terms & Conditions
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="text-primary hover:underline font-medium">
-                  Privacy Policy
-                </Link>
-                .
-              </p>
-            </Card>
+            <PaymentPlanSelector
+              property={property}
+              onPlanSelect={setSelectedPaymentPlan}
+              selectedPlan={selectedPaymentPlan}
+            />
           </div>
 
           {/* Right Column - Booking Card */}
@@ -256,11 +232,8 @@ export default function PropertyDetailPage() {
                   </div>
                 )}
 
-                <Button variant="accent" size="lg" fullWidth className="mb-3">
+                <Button variant="accent" size="lg" fullWidth>
                   Apply Now
-                </Button>
-                <Button variant="outline" size="lg" fullWidth>
-                  Schedule Viewing
                 </Button>
 
                 <div className="mt-6 pt-6 border-t border-gray-200 space-y-3 text-sm text-gray-600">
@@ -291,6 +264,70 @@ export default function PropertyDetailPage() {
                   </Button>
                 </Link>
               </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Location Map - Full Width */}
+        <div className="mt-12 py-8 border-t border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Where you'll be</h2>
+          <div className="w-full h-[450px] rounded-lg overflow-hidden mb-6">
+            <iframe
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              style={{ border: 0 }}
+              src={`https://www.google.com/maps?q=${property.latitude},${property.longitude}&hl=es;z=14&output=embed`}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+          <div className="flex items-start gap-2 mb-4">
+            <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">{property.city}, {property.state}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed mb-2">
+                {property.address}
+              </p>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                This property is located in {property.city}, a vibrant area with easy access to local amenities,
+                transportation, and major business districts.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Meet Your Host */}
+        <div className="mt-12 py-8 border-t border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Meet your host</h2>
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                {property.ownerId.charAt(0).toUpperCase()}
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Property Host</h3>
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-warning fill-current" />
+                  <span>{property.reviewCount} reviews</span>
+                </div>
+                {property.verified && (
+                  <div className="flex items-center gap-1">
+                    <Shield className="w-4 h-4 text-success" />
+                    <span>Verified host</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-gray-700 leading-relaxed mb-6">
+                This property is managed by a verified host on TruVade. All properties are lawyer-verified
+                to ensure legal compliance and authenticity. Your safety and satisfaction are our top priorities.
+              </p>
+              <Button variant="outline" size="md">
+                Chat with host
+              </Button>
             </div>
           </div>
         </div>

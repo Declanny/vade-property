@@ -24,7 +24,7 @@ export default function About() {
             className="space-y-6"
           >
             <div className="inline-flex items-center px-4 py-2 bg-milk-yellow-100 rounded-full text-sm font-medium text-milk-yellow-800">
-              About Vade Property
+              About TruVade
             </div>
 
             <h2 className="font-serif text-4xl md:text-5xl font-bold text-black">
@@ -33,7 +33,7 @@ export default function About() {
             </h2>
 
             <p className="text-lg text-black leading-relaxed">
-              With over 15 years of experience in the real estate industry, Vade Property has been
+              With over 15 years of experience in the real estate industry, TruVade has been
               connecting people with their dream homes and investment opportunities. Our commitment
               to excellence, integrity, and personalized service has made us a trusted name in the market.
             </p>

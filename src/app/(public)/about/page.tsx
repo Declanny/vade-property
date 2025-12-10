@@ -41,7 +41,7 @@ export default function AboutPage() {
         <Container>
           <div className="max-w-3xl mx-auto text-center">
             <Badge variant="accent" size="lg" className="mb-6">
-              About Vade Property
+              About TruVade
             </Badge>
             <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-6">
               Making Property Rental Safe, Secure, and Simple
@@ -76,7 +76,7 @@ export default function AboutPage() {
             </h2>
             <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
               <p>
-                Vade Property was founded with a simple mission: to make property rental in Nigeria transparent, secure, and accessible to everyone. We recognized the challenges both tenants and property owners face - fraud, lack of legal protection, and complicated payment processes.
+                TruVade was founded with a simple mission: to make property rental in Nigeria transparent, secure, and accessible to everyone. We recognized the challenges both tenants and property owners face - fraud, lack of legal protection, and complicated payment processes.
               </p>
               <p>
                 By partnering with licensed lawyers to verify every property and offering flexible payment plans, we've created a platform that protects everyone involved. Our technology-driven approach ensures transparency while maintaining the human touch that's essential in real estate.
@@ -97,7 +97,7 @@ export default function AboutPage() {
               Our Values
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              These principles guide everything we do at Vade Property
+              These principles guide everything we do at TruVade
             </p>
           </div>
 

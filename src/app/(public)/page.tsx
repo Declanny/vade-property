@@ -128,33 +128,41 @@ export default function HomePage() {
       </section>
 
       {/* Featured Properties Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-16 bg-white">
         <Container>
           <div className="text-center mb-12">
             <Badge variant="primary" size="lg" className="mb-4">
               Featured Listings
             </Badge>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Handpicked Properties for You
+              Verified Properties for You
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Browse our selection of verified properties with flexible payment options
+              Browse our selection of lawyer-verified properties with flexible payment options
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            {featuredProperties.slice(0, 3).map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          {featuredProperties.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-6 mb-10">
+                {featuredProperties.slice(0, 7).map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+              </div>
 
-          <div className="text-center">
-            <Link href="/properties">
-              <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
-                View All Properties
-              </Button>
-            </Link>
-          </div>
+              <div className="text-center">
+                <Link href="/properties">
+                  <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
+                    Show all properties
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No featured properties available at the moment.</p>
+            </div>
+          )}
         </Container>
       </section>
 

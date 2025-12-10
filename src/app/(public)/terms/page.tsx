@@ -26,14 +26,14 @@ export default function TermsPage() {
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
                 <p className="text-gray-700 mb-4">
-                  By accessing and using Vade Property's platform, you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.
+                  By accessing and using TruVade's platform, you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.
                 </p>
               </section>
 
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. Platform Services</h2>
                 <p className="text-gray-700 mb-4">
-                  Vade Property provides a platform connecting property owners and tenants. We facilitate:
+                  TruVade provides a platform connecting property owners and tenants. We facilitate:
                 </p>
                 <ul className="list-disc pl-6 text-gray-700 space-y-2">
                   <li>Lawyer-verified property listings</li>
@@ -59,7 +59,7 @@ export default function TermsPage() {
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Property Listings</h2>
                 <p className="text-gray-700 mb-4">
-                  Property owners must ensure all information provided is accurate and complete. Vade Property reserves the right to remove listings that violate our policies or contain false information.
+                  Property owners must ensure all information provided is accurate and complete. TruVade reserves the right to remove listings that violate our policies or contain false information.
                 </p>
               </section>
 
@@ -101,7 +101,7 @@ export default function TermsPage() {
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. Limitation of Liability</h2>
                 <p className="text-gray-700 mb-4">
-                  Vade Property is not liable for any indirect, incidental, or consequential damages arising from platform use. Our liability is limited to the amount of fees paid by you in the past 12 months.
+                  TruVade is not liable for any indirect, incidental, or consequential damages arising from platform use. Our liability is limited to the amount of fees paid by you in the past 12 months.
                 </p>
               </section>
 
