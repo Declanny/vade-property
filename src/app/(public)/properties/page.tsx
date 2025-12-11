@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Select } from "@/components/ui/Select";
 import { mockProperties } from "@/lib/data/mock";
 import { PropertyFilters as IPropertyFilters } from "@/lib/types";
-import { LayoutGrid, LayoutList } from "lucide-react";
+import { LayoutGrid, LayoutList, MapIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function PropertiesPage() {
   const [filters, setFilters] = useState<IPropertyFilters>({});
@@ -144,6 +145,16 @@ export default function PropertiesPage() {
           </div>
 
           <div className="flex items-center gap-4 w-full sm:w-auto">
+            {/* Map View Link */}
+            <Link
+              href="/properties/map"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors"
+              style={{ backgroundColor: '#0B3D2C' }}
+            >
+              <MapIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Map View</span>
+            </Link>
+
             {/* View Mode Toggle */}
             <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
               <button
