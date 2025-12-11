@@ -38,7 +38,7 @@ export function PropertyMapCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <Link href={`/properties/${property.id}`}>
+      <Link href={`/property/${property.id}`}>
         {/* Image */}
         <div className="relative h-48 overflow-hidden">
           <img

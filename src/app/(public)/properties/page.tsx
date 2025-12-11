@@ -10,6 +10,8 @@ import { mockProperties } from "@/lib/data/mock";
 import { PropertyFilters as IPropertyFilters } from "@/lib/types";
 import { LayoutGrid, LayoutList, MapIcon } from "lucide-react";
 import Link from "next/link";
+import LocationSection from "@/components/property/LocationSection";
+import { detectLocationFromAddress } from "@/lib/data/locations";
 
 export default function PropertiesPage() {
   const [filters, setFilters] = useState<IPropertyFilters>({});
@@ -109,6 +111,80 @@ export default function PropertiesPage() {
     { value: "rating", label: "Highest Rated" },
   ];
 
+  // Curated location sections (only show when no filters applied)
+  const showLocationSections = !searchQuery && Object.keys(filters).length === 0;
+
+  const locationSections = useMemo(() => {
+    if (!showLocationSections) return [];
+
+    return [
+      {
+        title: "Popular homes in Ikoyi",
+        description: "Luxury apartments with waterfront views",
+        slug: "ikoyi",
+        properties: mockProperties
+          .filter(p => detectLocationFromAddress(p.address)?.slug === 'ikoyi')
+          .filter(p => p.featured || (p.rating && p.rating >= 4.7))
+          .slice(0, 6),
+      },
+      {
+        title: "Affordable in Lekki",
+        description: "Modern living without breaking the bank",
+        slug: "lekki",
+        properties: mockProperties
+          .filter(p => detectLocationFromAddress(p.address)?.slug === 'lekki')
+          .filter(p => p.price < 2000000)
+          .slice(0, 6),
+      },
+      {
+        title: "Luxury in Victoria Island",
+        description: "Executive apartments in the heart of Lagos",
+        slug: "victoria-island",
+        properties: mockProperties
+          .filter(p => detectLocationFromAddress(p.address)?.slug === 'victoria-island')
+          .filter(p => p.price > 3000000)
+          .slice(0, 6),
+      },
+      {
+        title: "Student-friendly in Yaba",
+        description: "Perfect for young professionals and students",
+        slug: "yaba",
+        properties: mockProperties
+          .filter(p => detectLocationFromAddress(p.address)?.slug === 'yaba')
+          .slice(0, 6),
+      },
+      {
+        title: "Family homes in Ikeja",
+        description: "Spacious properties for growing families",
+        slug: "ikeja",
+        properties: mockProperties
+          .filter(p => detectLocationFromAddress(p.address)?.slug === 'ikeja')
+          .filter(p => p.bedrooms >= 3)
+          .slice(0, 6),
+      },
+      {
+        title: "Available Next Month",
+        description: "Move in soon",
+        properties: mockProperties
+          .filter(p => {
+            const availDate = new Date(p.availableFrom);
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            return availDate <= nextMonth;
+          })
+          .sort((a, b) => new Date(a.availableFrom).getTime() - new Date(b.availableFrom).getTime())
+          .slice(0, 6),
+      },
+      {
+        title: "Newly Added",
+        description: "Latest properties on the market",
+        properties: mockProperties
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .slice(0, 6),
+      },
+    ].filter(section => section.properties.length > 0);
+  }, [showLocationSections]);
+
   return (
     <div className="bg-gray-50 min-h-screen py-8">
       <Container>
@@ -191,6 +267,29 @@ export default function PropertiesPage() {
             </div>
           </div>
         </div>
+
+        {/* Location Sections (only when no filters) */}
+        {showLocationSections && (
+          <div className="space-y-8 mb-12">
+            {locationSections.map((section) => (
+              <LocationSection
+                key={section.slug || section.title}
+                title={section.title}
+                description={section.description}
+                properties={section.properties}
+                locationSlug={section.slug}
+                favorites={favorites}
+                onFavorite={handleFavorite}
+              />
+            ))}
+
+            {/* Divider */}
+            <div className="border-t border-gray-300 pt-8 mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">All Properties</h2>
+              <p className="text-gray-600">Browse our complete collection</p>
+            </div>
+          </div>
+        )}
 
         {/* Properties Grid/List */}
         {filteredProperties.length > 0 ? (

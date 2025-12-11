@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Property } from '@/lib/types';
@@ -11,17 +11,20 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 
-const DefaultIcon = L.icon({
-  iconUrl: icon.src,
-  iconRetinaUrl: iconRetina.src,
-  shadowUrl: iconShadow.src,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+// Only initialize Leaflet icons on the client side
+if (typeof window !== 'undefined') {
+  const DefaultIcon = L.icon({
+    iconUrl: icon.src,
+    iconRetinaUrl: iconRetina.src,
+    shadowUrl: iconShadow.src,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
 
-L.Marker.prototype.options.icon = DefaultIcon;
+  L.Marker.prototype.options.icon = DefaultIcon;
+}
 
 // Create custom marker icons
 const createNumberedIcon = (price: number, isActive: boolean = false) => {
@@ -86,6 +89,12 @@ export default function PropertyMap({
   onPropertyClick,
   onPropertyHover,
 }: PropertyMapProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Calculate center based on all properties
   const center: [number, number] = useMemo(() => {
     if (selectedPropertyId) {
@@ -108,8 +117,16 @@ export default function PropertyMap({
     return selectedPropertyId ? 14 : 11;
   }, [selectedPropertyId]);
 
+  if (!isMounted) {
+    return (
+      <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+        <div className="text-gray-500">Loading map...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full w-full rounded-xl overflow-hidden">
+    <div className="h-full w-full">
       <MapContainer
         center={center}
         zoom={zoom}

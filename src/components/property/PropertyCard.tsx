@@ -24,7 +24,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   };
 
   return (
-    <Link href={`/properties/${property.id}`} className="block">
+    <Link href={`/property/${property.id}`} className="block">
       <div className="group cursor-pointer">
         {/* Image Section - Airbnb Style */}
         <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-3">
