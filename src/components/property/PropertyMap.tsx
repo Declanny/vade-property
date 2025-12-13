@@ -76,8 +76,8 @@ function MapUpdater({ center, zoom }: MapUpdaterProps) {
 
 interface PropertyMapProps {
   properties: Property[];
-  selectedPropertyId?: string;
-  hoveredPropertyId?: string;
+  selectedPropertyId?: string | null;
+  hoveredPropertyId?: string | null;
   onPropertyClick: (propertyId: string) => void;
   onPropertyHover?: (propertyId: string | null) => void;
 }
@@ -99,7 +99,7 @@ export default function PropertyMap({
   const center: [number, number] = useMemo(() => {
     if (selectedPropertyId) {
       const property = properties.find(p => p.id === selectedPropertyId);
-      if (property) {
+      if (property && property.latitude && property.longitude) {
         return [property.latitude, property.longitude];
       }
     }
@@ -108,8 +108,13 @@ export default function PropertyMap({
       return [6.5244, 3.3792]; // Lagos default
     }
 
-    const avgLat = properties.reduce((sum, p) => sum + p.latitude, 0) / properties.length;
-    const avgLng = properties.reduce((sum, p) => sum + p.longitude, 0) / properties.length;
+    const validProperties = properties.filter(p => p.latitude !== undefined && p.longitude !== undefined);
+    if (validProperties.length === 0) {
+      return [6.5244, 3.3792]; // Lagos default
+    }
+
+    const avgLat = validProperties.reduce((sum, p) => sum + (p.latitude || 0), 0) / validProperties.length;
+    const avgLng = validProperties.reduce((sum, p) => sum + (p.longitude || 0), 0) / validProperties.length;
     return [avgLat, avgLng];
   }, [properties, selectedPropertyId]);
 
@@ -141,13 +146,13 @@ export default function PropertyMap({
 
         <MapUpdater center={center} zoom={zoom} />
 
-        {properties.map((property) => {
+        {properties.filter(p => p.latitude && p.longitude).map((property) => {
           const isActive = hoveredPropertyId === property.id || selectedPropertyId === property.id;
 
           return (
             <Marker
               key={property.id}
-              position={[property.latitude, property.longitude]}
+              position={[property.latitude!, property.longitude!]}
               icon={createNumberedIcon(property.price, isActive)}
               eventHandlers={{
                 click: () => onPropertyClick(property.id),

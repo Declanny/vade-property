@@ -167,19 +167,28 @@ export default function PropertiesPage() {
         description: "Move in soon",
         properties: mockProperties
           .filter(p => {
-            const availDate = new Date(p.availableFrom);
+            if (!p.availableFrom) return false;
+            const availDate = p.availableFrom instanceof Date ? p.availableFrom : new Date(p.availableFrom);
             const nextMonth = new Date();
             nextMonth.setMonth(nextMonth.getMonth() + 1);
             return availDate <= nextMonth;
           })
-          .sort((a, b) => new Date(a.availableFrom).getTime() - new Date(b.availableFrom).getTime())
+          .sort((a, b) => {
+            const dateA = a.availableFrom instanceof Date ? a.availableFrom : new Date(a.availableFrom || 0);
+            const dateB = b.availableFrom instanceof Date ? b.availableFrom : new Date(b.availableFrom || 0);
+            return dateA.getTime() - dateB.getTime();
+          })
           .slice(0, 6),
       },
       {
         title: "Newly Added",
         description: "Latest properties on the market",
         properties: mockProperties
-          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .sort((a, b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+            const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
+          })
           .slice(0, 6),
       },
     ].filter(section => section.properties.length > 0);

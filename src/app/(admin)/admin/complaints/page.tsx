@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { getActiveComplaints, mockComplaints, mockProperties, mockTenants } from '@/lib/data/adminMock';
-import { AlertCircle, Clock, CheckCircle, Filter, MessageSquare, Image as ImageIcon, Video } from 'lucide-react';
+import { AlertCircle, Clock, CheckCircle, Filter, MessageSquare, Image as ImageIcon, Video, Plus } from 'lucide-react';
 import type { Complaint, ComplaintStatus } from '@/lib/types/admin';
 
 export default function ComplaintsPage() {
@@ -65,17 +66,27 @@ export default function ComplaintsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Complaints & Maintenance</h1>
-        <p className="text-gray-600 mt-1">Manage and resolve tenant complaints</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Complaints & Maintenance</h1>
+          <p className="text-gray-600 mt-1">Manage and resolve tenant complaints</p>
+        </div>
+        <Link
+          href="/admin/complaints/create"
+          className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center"
+          style={{ backgroundColor: '#0B3D2C' }}
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Create Complaint
+        </Link>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <button
           onClick={() => setSelectedStatus('all')}
-          className={`text-left p-4 rounded-xl border-2 transition-all ${
-            selectedStatus === 'all' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
+          className={`text-left p-4 rounded-xl border-2 transition-all bg-white ${
+            selectedStatus === 'all' ? 'border-[#0B3D2C]' : 'border-gray-200 hover:border-gray-300'
           }`}
         >
           <p className="text-sm font-medium text-gray-600">Total Complaints</p>
@@ -83,34 +94,34 @@ export default function ComplaintsPage() {
         </button>
         <button
           onClick={() => setSelectedStatus('open')}
-          className={`text-left p-4 rounded-xl border-2 transition-all ${
-            selectedStatus === 'open' ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white hover:border-gray-300'
+          className={`text-left p-4 rounded-xl border-2 transition-all bg-white ${
+            selectedStatus === 'open' ? 'border-[#0B3D2C]' : 'border-gray-200 hover:border-gray-300'
           }`}
         >
-          <p className="text-sm font-medium text-red-700">Open</p>
-          <p className="text-3xl font-bold text-red-900 mt-2">
+          <p className="text-sm font-medium text-gray-600">Open</p>
+          <p className="text-3xl font-bold text-red-600 mt-2">
             {complaints.filter(c => c.status === 'open').length}
           </p>
         </button>
         <button
           onClick={() => setSelectedStatus('in_progress')}
-          className={`text-left p-4 rounded-xl border-2 transition-all ${
-            selectedStatus === 'in_progress' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
+          className={`text-left p-4 rounded-xl border-2 transition-all bg-white ${
+            selectedStatus === 'in_progress' ? 'border-[#0B3D2C]' : 'border-gray-200 hover:border-gray-300'
           }`}
         >
-          <p className="text-sm font-medium text-blue-700">In Progress</p>
-          <p className="text-3xl font-bold text-blue-900 mt-2">
+          <p className="text-sm font-medium text-gray-600">In Progress</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">
             {complaints.filter(c => c.status === 'in_progress').length}
           </p>
         </button>
         <button
           onClick={() => setSelectedStatus('resolved')}
-          className={`text-left p-4 rounded-xl border-2 transition-all ${
-            selectedStatus === 'resolved' ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white hover:border-gray-300'
+          className={`text-left p-4 rounded-xl border-2 transition-all bg-white ${
+            selectedStatus === 'resolved' ? 'border-[#0B3D2C]' : 'border-gray-200 hover:border-gray-300'
           }`}
         >
-          <p className="text-sm font-medium text-green-700">Resolved</p>
-          <p className="text-3xl font-bold text-green-900 mt-2">
+          <p className="text-sm font-medium text-gray-600">Resolved</p>
+          <p className="text-3xl font-bold text-green-600 mt-2">
             {complaints.filter(c => c.status === 'resolved').length}
           </p>
         </button>
@@ -130,7 +141,7 @@ export default function ComplaintsPage() {
                 onClick={() => setSelectedComplaint(complaint)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   selectedComplaint?.id === complaint.id
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-[#0B3D2C] bg-green-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
@@ -163,17 +174,17 @@ export default function ComplaintsPage() {
         {selectedComplaint && (
           <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6">
+            <div className="border-b border-gray-200 p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     {getPriorityBadge(selectedComplaint.priority)}
-                    <span className="text-xs bg-white/20 px-2 py-1 rounded">
+                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded capitalize">
                       {selectedComplaint.category}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-bold mb-2">{selectedComplaint.title}</h2>
-                  <p className="text-orange-100 text-sm">
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">{selectedComplaint.title}</h2>
+                  <p className="text-gray-500 text-sm">
                     Complaint ID: {selectedComplaint.id}
                   </p>
                 </div>
@@ -182,23 +193,23 @@ export default function ComplaintsPage() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-orange-200">Tenant</p>
-                  <p className="font-semibold">{getTenantName(selectedComplaint.tenantId)}</p>
+                  <p className="text-gray-500">Tenant</p>
+                  <p className="font-medium text-gray-900">{getTenantName(selectedComplaint.tenantId)}</p>
                 </div>
                 <div>
-                  <p className="text-orange-200">Property</p>
-                  <p className="font-semibold">{getPropertyName(selectedComplaint.propertyId)}</p>
+                  <p className="text-gray-500">Property</p>
+                  <p className="font-medium text-gray-900">{getPropertyName(selectedComplaint.propertyId)}</p>
                 </div>
                 <div>
-                  <p className="text-orange-200">Submitted</p>
-                  <p className="font-semibold">
+                  <p className="text-gray-500">Submitted</p>
+                  <p className="font-medium text-gray-900">
                     {new Date(selectedComplaint.createdAt).toLocaleString('en-NG')}
                   </p>
                 </div>
                 {selectedComplaint.resolvedAt && (
                   <div>
-                    <p className="text-orange-200">Resolved</p>
-                    <p className="font-semibold">
+                    <p className="text-gray-500">Resolved</p>
+                    <p className="font-medium text-gray-900">
                       {new Date(selectedComplaint.resolvedAt).toLocaleString('en-NG')}
                     </p>
                   </div>
@@ -219,14 +230,14 @@ export default function ComplaintsPage() {
                   <h3 className="font-semibold text-gray-900 mb-3">Attachments</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {selectedComplaint.images?.map((img, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-lg p-3 flex items-center space-x-3 hover:border-blue-300 cursor-pointer">
-                        <ImageIcon className="w-5 h-5 text-gray-600" />
+                      <div key={idx} className="border border-gray-200 rounded-lg p-3 flex items-center space-x-3 hover:border-gray-300 cursor-pointer">
+                        <ImageIcon className="w-5 h-5 text-gray-500" />
                         <span className="text-sm text-gray-700">Image {idx + 1}</span>
                       </div>
                     ))}
                     {selectedComplaint.videos?.map((vid, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-lg p-3 flex items-center space-x-3 hover:border-blue-300 cursor-pointer">
-                        <Video className="w-5 h-5 text-gray-600" />
+                      <div key={idx} className="border border-gray-200 rounded-lg p-3 flex items-center space-x-3 hover:border-gray-300 cursor-pointer">
+                        <Video className="w-5 h-5 text-gray-500" />
                         <span className="text-sm text-gray-700">Video {idx + 1}</span>
                       </div>
                     ))}
@@ -240,7 +251,7 @@ export default function ComplaintsPage() {
                 <div className="space-y-4">
                   {selectedComplaint.timeline.map((entry) => (
                     <div key={entry.id} className="flex items-start">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3"></div>
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">{entry.action}</p>
                         {entry.notes && (
@@ -257,9 +268,9 @@ export default function ComplaintsPage() {
 
               {/* Resolution Notes (if resolved) */}
               {selectedComplaint.resolutionNotes && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-green-900 mb-2">Resolution Notes</h3>
-                  <p className="text-green-800 text-sm">{selectedComplaint.resolutionNotes}</p>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Resolution Notes</h3>
+                  <p className="text-gray-700 text-sm">{selectedComplaint.resolutionNotes}</p>
                 </div>
               )}
 
@@ -271,7 +282,7 @@ export default function ComplaintsPage() {
                     value={updateNotes}
                     onChange={(e) => setUpdateNotes(e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent mb-4"
                     placeholder="Add update notes..."
                   />
 
@@ -288,7 +299,8 @@ export default function ComplaintsPage() {
                     {selectedComplaint.status === 'in_progress' && (
                       <button
                         onClick={() => handleStatusUpdate('resolved')}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                        className="text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-colors"
+                        style={{ backgroundColor: '#0B3D2C' }}
                       >
                         Mark Resolved
                       </button>

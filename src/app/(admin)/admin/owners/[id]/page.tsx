@@ -20,6 +20,7 @@ import {
   CreditCard,
   MessageSquare,
   Plus,
+  Pencil,
 } from 'lucide-react';
 import {
   mockPropertyOwners,
@@ -190,15 +191,24 @@ export default function OwnerProfilePage() {
               </div>
             </div>
           </div>
-          {/* Add Tenant Button */}
-          <Link
-            href={`/admin/tenants/add?ownerId=${owner.id}`}
-            className="text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-colors flex items-center"
-            style={{ backgroundColor: '#B87333' }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Tenant
-          </Link>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/admin/owners/${owner.id}/edit`}
+              className="px-4 py-2 rounded-lg font-medium transition-colors flex items-center border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit Owner
+            </Link>
+            <Link
+              href={`/admin/tenants/add?ownerId=${owner.id}`}
+              className="text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-colors flex items-center"
+              style={{ backgroundColor: '#B87333' }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Tenant
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { mockProperties, mockPropertyOwners } from '@/lib/data/adminMock';
-import { Home, MapPin, DollarSign, Bed, Bath, Maximize, Eye, EyeOff, Plus } from 'lucide-react';
+import { PropertyCard } from '@/components/property/PropertyCard';
+import type { Property as PublicProperty } from '@/lib/types';
+import type { Property as AdminProperty } from '@/lib/types/admin';
+import { Home, Eye, EyeOff } from 'lucide-react';
 
 export default function VacanciesPage() {
   const vacantProperties = mockProperties.filter(p => p.status === 'vacant' || p.status === 'under_review');
   const [publishedIds, setPublishedIds] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const togglePublish = (propertyId: string) => {
     const newSet = new Set(publishedIds);
@@ -19,17 +23,77 @@ export default function VacanciesPage() {
     setPublishedIds(newSet);
   };
 
+  const handleFavorite = useCallback((propertyId: string) => {
+    setFavorites((prev) => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(propertyId)) {
+        newFavorites.delete(propertyId);
+      } else {
+        newFavorites.add(propertyId);
+      }
+      return newFavorites;
+    });
+  }, []);
+
   const getOwnerName = (ownerId: string) => {
     const owner = mockPropertyOwners.find(o => o.id === ownerId);
     return owner ? `${owner.firstName} ${owner.lastName}` : 'Unknown';
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
+  // Convert admin property to public property format for PropertyCard
+  const convertToPublicProperty = (adminProp: AdminProperty): PublicProperty => {
+    const propertyImages = [
+      '/propertymain.avif',
+      '/section2prop.png',
+      '/section3prop.png',
+      '/section4prop.png',
+    ];
+
+    const imageIndex = parseInt(adminProp.id.split('-')[1] || '1', 10) % propertyImages.length;
+
+    return {
+      id: adminProp.id,
+      ownerId: adminProp.ownerId,
+      title: adminProp.name,
+      description: adminProp.description,
+      type: adminProp.type,
+      address: adminProp.address,
+      city: adminProp.city,
+      state: adminProp.state,
+      country: 'Nigeria',
+      zipCode: adminProp.zipCode,
+      latitude: 6.5244,
+      longitude: 3.3792,
+      price: adminProp.monthlyRent,
       currency: 'NGN',
-      minimumFractionDigits: 0,
-    }).format(amount);
+      paymentPlans: ['1_month', '3_months', '6_months', '12_months'],
+      bedrooms: adminProp.bedrooms,
+      bathrooms: adminProp.bathrooms,
+      area: adminProp.area,
+      areaUnit: 'sqft',
+      amenities: adminProp.amenities,
+      images: [propertyImages[imageIndex]],
+      verified: adminProp.status === 'vacant',
+      status: 'active',
+      featured: false,
+      rating: 4.5,
+      reviewCount: 0,
+      createdAt: new Date(adminProp.createdAt),
+      updatedAt: new Date(adminProp.updatedAt),
+    } as PublicProperty;
+  };
+
+  const getStatusBadge = (status: string) => {
+    const badges = {
+      vacant: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
+      under_review: { bg: 'bg-blue-100', text: 'text-blue-700' },
+    };
+    const badge = badges[status as keyof typeof badges] || badges.vacant;
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text} capitalize`}>
+        {status.replace('_', ' ')}
+      </span>
+    );
   };
 
   return (
@@ -66,76 +130,25 @@ export default function VacanciesPage() {
           <p className="text-gray-600">There are no vacant properties at the moment.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {vacantProperties.map((property) => {
             const isPublished = publishedIds.has(property.id);
 
             return (
-              <div
-                key={property.id}
-                className={`bg-white rounded-xl border-2 overflow-hidden transition-all ${
-                  isPublished ? 'border-green-500' : 'border-gray-200'
-                }`}
-              >
-                {/* Property Image */}
-                <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 relative">
-                  <div className="absolute top-3 right-3">
-                    {isPublished ? (
-                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
-                        <Eye className="w-3 h-3 mr-1" />
-                        Published
-                      </span>
-                    ) : (
-                      <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center">
-                        <EyeOff className="w-3 h-3 mr-1" />
-                        Draft
-                      </span>
-                    )}
+              <div key={property.id} className="relative">
+                <PropertyCard
+                  property={convertToPublicProperty(property)}
+                  onFavorite={handleFavorite}
+                  isFavorite={favorites.has(property.id)}
+                />
+                {/* Admin Info Overlay */}
+                <div className="mt-3 bg-white rounded-lg border border-gray-200 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-gray-600">Status</span>
+                    {getStatusBadge(property.status)}
                   </div>
-                  {property.status === 'under_review' && (
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Under Review
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Property Details */}
-                <div className="p-5 space-y-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{property.name}</h3>
-                    <div className="flex items-start text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" />
-                      <p>{property.address}, {property.city}, {property.state}</p>
-                    </div>
-                  </div>
-
-                  {/* Property Stats */}
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <Bed className="w-4 h-4 mr-1" />
-                      {property.bedrooms}
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Bath className="w-4 h-4 mr-1" />
-                      {property.bathrooms}
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Maximize className="w-4 h-4 mr-1" />
-                      {property.area} sqft
-                    </div>
-                  </div>
-
-                  {/* Rent */}
-                  <div className="border-t border-gray-200 pt-3">
-                    <p className="text-sm text-gray-600 mb-1">Monthly Rent</p>
-                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(property.monthlyRent)}</p>
-                  </div>
-
-                  {/* Owner */}
-                  <div className="text-sm">
-                    <p className="text-gray-600">Owner</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Owner</span>
                     <Link
                       href={`/admin/owners/${property.ownerId}`}
                       className="font-medium text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#0B3D2C] hover:decoration-[#0B3D2C] transition-colors"
@@ -143,36 +156,30 @@ export default function VacanciesPage() {
                       {getOwnerName(property.ownerId)}
                     </Link>
                   </div>
-
-                  {/* Amenities */}
-                  {property.amenities.length > 0 && (
-                    <div>
-                      <p className="text-sm text-gray-600 mb-2">Amenities</p>
-                      <div className="flex flex-wrap gap-2">
-                        {property.amenities.slice(0, 3).map((amenity, idx) => (
-                          <span key={idx} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                            {amenity}
-                          </span>
-                        ))}
-                        {property.amenities.length > 3 && (
-                          <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                            +{property.amenities.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Published</span>
+                    {isPublished ? (
+                      <span className="flex items-center text-green-700 font-medium">
+                        <Eye className="w-3 h-3 mr-1" />
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="flex items-center text-gray-500 font-medium">
+                        <EyeOff className="w-3 h-3 mr-1" />
+                        No
+                      </span>
+                    )}
+                  </div>
                   {/* Actions */}
-                  <div className="flex space-x-2 pt-3 border-t border-gray-200">
+                  <div className="flex space-x-2 pt-2 border-t border-gray-100">
                     <button
                       onClick={() => togglePublish(property.id)}
-                      className="flex-1 px-4 py-2 rounded-lg font-semibold text-white hover:opacity-90 transition-colors"
+                      className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white hover:opacity-90 transition-colors"
                       style={{ backgroundColor: isPublished ? '#EF4444' : '#0B3D2C' }}
                     >
                       {isPublished ? 'Unpublish' : 'Publish'}
                     </button>
-                    <button className="px-4 py-2 rounded-lg font-semibold text-white hover:opacity-90 transition-colors" style={{ backgroundColor: '#B87333' }}>
+                    <button className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white hover:opacity-90 transition-colors" style={{ backgroundColor: '#B87333' }}>
                       Edit
                     </button>
                   </div>

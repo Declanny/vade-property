@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { mockProperties, mockPropertyOwners, mockTenants } from '@/lib/data/adminMock';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import type { Property as PublicProperty } from '@/lib/types';
@@ -104,9 +105,19 @@ export default function PropertiesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Properties</h1>
-        <p className="text-gray-600 mt-1">Manage all properties in the system</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Properties</h1>
+          <p className="text-gray-600 mt-1">Manage all properties in the system</p>
+        </div>
+        <Link
+          href="/admin/properties/add"
+          className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center"
+          style={{ backgroundColor: '#0B3D2C' }}
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Add Property
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

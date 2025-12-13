@@ -155,7 +155,7 @@ export interface Lease {
   nextDueDate: Date;
   status: LeaseStatus;
   securityDeposit: number;
-  lateFeePer Day: number;
+  lateFeePerDay: number;
   createdAt: Date;
   updatedAt: Date;
 }

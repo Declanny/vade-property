@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { mockPayments, mockTenants, mockProperties, getOverduePayments } from '@/lib/data/adminMock';
-import { CreditCard, CheckCircle, Clock, AlertCircle, Download, Filter } from 'lucide-react';
+import Link from 'next/link';
+import { CreditCard, CheckCircle, Clock, AlertCircle, Download, Filter, Plus } from 'lucide-react';
 import type { PaymentStatus } from '@/lib/types/admin';
 
 export default function PaymentsPage() {
@@ -61,71 +62,84 @@ export default function PaymentsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Payments & Rent Collection</h1>
           <p className="text-gray-600 mt-1">Monitor and manage all property payments</p>
         </div>
-        <button className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center" style={{ backgroundColor: '#0B3D2C' }}>
-          <Download className="w-5 h-5 mr-2" />
-          Export Report
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/payments/record"
+            className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center"
+            style={{ backgroundColor: '#0B3D2C' }}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Record Payment
+          </Link>
+          <button className="px-6 py-3 rounded-lg font-semibold transition-colors flex items-center border border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Download className="w-5 h-5 mr-2" />
+            Export Report
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-green-600 to-green-700 text-white rounded-xl p-6">
-          <p className="text-green-100 text-sm mb-2">Total Revenue</p>
-          <p className="text-3xl font-bold">{formatCurrency(totalRevenue)}</p>
-          <p className="text-green-100 text-xs mt-2">
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <p className="text-gray-600 text-sm mb-2">Total Revenue</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p>
+          <p className="text-gray-500 text-xs mt-2">
             {payments.filter(p => p.status === 'completed').length} payments
           </p>
         </div>
-        <div className="bg-gradient-to-br from-yellow-600 to-yellow-700 text-white rounded-xl p-6">
-          <p className="text-yellow-100 text-sm mb-2">Pending</p>
-          <p className="text-3xl font-bold">{formatCurrency(pendingAmount)}</p>
-          <p className="text-yellow-100 text-xs mt-2">
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <p className="text-gray-600 text-sm mb-2">Pending</p>
+          <p className="text-2xl font-bold text-gray-900">{formatCurrency(pendingAmount)}</p>
+          <p className="text-gray-500 text-xs mt-2">
             {payments.filter(p => p.status === 'pending').length} pending
           </p>
         </div>
-        <div className="bg-gradient-to-br from-red-600 to-red-700 text-white rounded-xl p-6">
-          <p className="text-red-100 text-sm mb-2">Overdue</p>
-          <p className="text-3xl font-bold">{overduePayments.length}</p>
-          <p className="text-red-100 text-xs mt-2">
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <p className="text-gray-600 text-sm mb-2">Overdue</p>
+          <p className="text-2xl font-bold text-red-600">{overduePayments.length}</p>
+          <p className="text-gray-500 text-xs mt-2">
             {formatCurrency(overduePayments.reduce((sum, p) => sum + p.amount, 0))}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl p-6">
-          <p className="text-blue-100 text-sm mb-2">This Month</p>
-          <p className="text-3xl font-bold">
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <p className="text-gray-600 text-sm mb-2">This Month</p>
+          <p className="text-2xl font-bold text-gray-900">
             {payments.filter(
               p => p.status === 'completed' &&
               new Date(p.paidAt || '').getMonth() === new Date().getMonth()
             ).length}
           </p>
-          <p className="text-blue-100 text-xs mt-2">Payments received</p>
+          <p className="text-gray-500 text-xs mt-2">Payments received</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex items-center space-x-2">
-        <Filter className="w-5 h-5 text-gray-500" />
+        <Filter className="w-5 h-5 text-gray-400" />
         <button
           onClick={() => setSelectedStatus('all')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedStatus === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            selectedStatus === 'all' ? 'text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+          style={selectedStatus === 'all' ? { backgroundColor: '#0B3D2C' } : {}}
         >
           All ({payments.length})
         </button>
         <button
           onClick={() => setSelectedStatus('completed')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedStatus === 'completed' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            selectedStatus === 'completed' ? 'text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+          style={selectedStatus === 'completed' ? { backgroundColor: '#0B3D2C' } : {}}
         >
           Completed ({payments.filter(p => p.status === 'completed').length})
         </button>
         <button
           onClick={() => setSelectedStatus('pending')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            selectedStatus === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            selectedStatus === 'pending' ? 'text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+          style={selectedStatus === 'pending' ? { backgroundColor: '#0B3D2C' } : {}}
         >
           Pending ({payments.filter(p => p.status === 'pending').length})
         </button>
@@ -133,17 +147,22 @@ export default function PaymentsPage() {
 
       {/* Overdue Alert */}
       {overduePayments.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
-          <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5" />
+        <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-start">
+          <div className="p-2 bg-red-100 rounded-lg mr-3">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+          </div>
           <div className="flex-1">
-            <p className="font-semibold text-red-900">
+            <p className="font-semibold text-gray-900">
               {overduePayments.length} Overdue Payment{overduePayments.length > 1 ? 's' : ''}
             </p>
-            <p className="text-sm text-red-700 mt-1">
-              Total overdue amount: {formatCurrency(overduePayments.reduce((sum, p) => sum + p.amount, 0))}
+            <p className="text-sm text-gray-600 mt-1">
+              Total overdue amount: <span className="font-medium text-red-600">{formatCurrency(overduePayments.reduce((sum, p) => sum + p.amount, 0))}</span>
             </p>
           </div>
-          <button className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
+          <button
+            className="text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-colors"
+            style={{ backgroundColor: '#0B3D2C' }}
+          >
             Send Reminders
           </button>
         </div>
@@ -238,11 +257,11 @@ export default function PaymentsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">
                           View
                         </button>
                         {payment.receiptUrl && (
-                          <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                          <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">
                             Receipt
                           </button>
                         )}

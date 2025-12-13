@@ -11,7 +11,8 @@ import {
   MessageSquareWarning,
   FileText,
   Settings,
-  HomeIcon
+  HomeIcon,
+  BarChart3
 } from 'lucide-react';
 
 const navigation = [
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'Payments', href: '/admin/payments', icon: CreditCard },
   { name: 'Complaints', href: '/admin/complaints', icon: MessageSquareWarning, badge: 'active' },
   { name: 'Vacancies', href: '/admin/vacancies', icon: FileText },
+  { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

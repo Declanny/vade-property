@@ -69,21 +69,21 @@ export default function KYCReviewPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <p className="text-sm font-medium text-yellow-700">Pending Review</p>
-          <p className="text-3xl font-bold text-yellow-900 mt-2">{applications.length}</p>
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-gray-600">Pending Review</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{applications.length}</p>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p className="text-sm font-medium text-blue-700">Under Review</p>
-          <p className="text-3xl font-bold text-blue-900 mt-2">0</p>
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-gray-600">Under Review</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
         </div>
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-          <p className="text-sm font-medium text-green-700">Approved Today</p>
-          <p className="text-3xl font-bold text-green-900 mt-2">0</p>
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-gray-600">Approved Today</p>
+          <p className="text-3xl font-bold text-green-600 mt-2">0</p>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-          <p className="text-sm font-medium text-red-700">Rejected Today</p>
-          <p className="text-3xl font-bold text-red-900 mt-2">0</p>
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-gray-600">Rejected Today</p>
+          <p className="text-3xl font-bold text-red-600 mt-2">0</p>
         </div>
       </div>
 
@@ -106,7 +106,7 @@ export default function KYCReviewPage() {
                 onClick={() => setSelectedApplication(app)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   selectedApplication?.id === app.id
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-[#0B3D2C] bg-green-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
@@ -137,40 +137,40 @@ export default function KYCReviewPage() {
           {selectedApplication && (
             <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
               {/* Applicant Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+              <div className="border-b border-gray-200 p-6">
                 <div className="flex items-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold mr-4">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold mr-4" style={{ backgroundColor: '#0B3D2C' }}>
                     {selectedApplication.firstName[0]}{selectedApplication.lastName[0]}
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold">
+                    <h2 className="text-xl font-bold text-gray-900">
                       {selectedApplication.firstName} {selectedApplication.lastName}
                     </h2>
-                    <p className="text-blue-100">KYC Application Review</p>
+                    <p className="text-sm text-gray-500">KYC Application Review</p>
                   </div>
-                  <div className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
-                    Pending
-                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                    Pending Review
+                  </span>
                 </div>
 
                 {/* Contact Info */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
                   <div className="flex items-center">
-                    <Mail className="w-4 h-4 mr-2" />
+                    <Mail className="w-4 h-4 mr-2 text-gray-400" />
                     {selectedApplication.email}
                   </div>
                   <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-2" />
+                    <Phone className="w-4 h-4 mr-2 text-gray-400" />
                     {selectedApplication.phone}
                   </div>
                   {selectedApplication.dateOfBirth && (
                     <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-2" />
+                      <Calendar className="w-4 h-4 mr-2 text-gray-400" />
                       DOB: {new Date(selectedApplication.dateOfBirth).toLocaleDateString('en-NG')}
                     </div>
                   )}
                   <div className="flex items-center">
-                    <User className="w-4 h-4 mr-2" />
+                    <User className="w-4 h-4 mr-2 text-gray-400" />
                     Submitted: {new Date(selectedApplication.createdAt).toLocaleDateString('en-NG')}
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export default function KYCReviewPage() {
                     {selectedApplication.documents.map((doc) => (
                       <div
                         key={doc.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                        className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center flex-1">
@@ -206,16 +206,16 @@ export default function KYCReviewPage() {
                           {getDocumentStatusBadge(doc.status)}
                         </div>
 
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                           <span className="text-xs text-gray-500">
                             Uploaded: {new Date(doc.uploadedAt).toLocaleString('en-NG')}
                           </span>
                           <div className="flex space-x-2">
-                            <button className="flex items-center px-3 py-1 text-sm text-white rounded hover:opacity-90 transition-colors" style={{ backgroundColor: '#0B3D2C' }}>
+                            <button className="flex items-center px-3 py-1.5 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
                               <Eye className="w-4 h-4 mr-1" />
                               View
                             </button>
-                            <button className="flex items-center px-3 py-1 text-sm text-white rounded hover:opacity-90 transition-colors" style={{ backgroundColor: '#B87333' }}>
+                            <button className="flex items-center px-3 py-1.5 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors">
                               <Download className="w-4 h-4 mr-1" />
                               Download
                             </button>
@@ -227,10 +227,10 @@ export default function KYCReviewPage() {
                 )}
 
                 {/* Auto-Approval Check */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
-                    <AlertCircle className="w-5 h-5 mr-2" />
-                    Auto-Approval Criteria
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <AlertCircle className="w-5 h-5 mr-2 text-gray-500" />
+                    Verification Checklist
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center">
@@ -238,11 +238,11 @@ export default function KYCReviewPage() {
                       <span className="text-gray-700">All required documents submitted</span>
                     </div>
                     <div className="flex items-center">
-                      <X className="w-4 h-4 text-red-600 mr-2" />
+                      <X className="w-4 h-4 text-red-500 mr-2" />
                       <span className="text-gray-700">Income verification (₦0 vs required ₦0)</span>
                     </div>
                     <div className="flex items-center">
-                      <AlertCircle className="w-4 h-4 text-yellow-600 mr-2" />
+                      <AlertCircle className="w-4 h-4 text-gray-400 mr-2" />
                       <span className="text-gray-700">Manual review required</span>
                     </div>
                   </div>
@@ -257,7 +257,7 @@ export default function KYCReviewPage() {
                     value={reviewNotes}
                     onChange={(e) => setReviewNotes(e.target.value)}
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
                     placeholder="Add notes about your decision..."
                   />
                 </div>

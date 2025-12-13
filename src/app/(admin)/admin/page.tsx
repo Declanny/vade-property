@@ -22,55 +22,47 @@ const statCards = [
     name: 'Total Owners',
     value: stats.totalOwners,
     icon: Users,
-    color: 'blue',
     href: '/admin/owners'
   },
   {
     name: 'Total Properties',
     value: stats.totalProperties,
     icon: Building2,
-    color: 'purple',
     href: '/admin/properties'
   },
   {
     name: 'Active Tenants',
     value: stats.totalTenants,
     icon: Home,
-    color: 'green',
     href: '/admin/tenants'
   },
   {
     name: 'Occupancy Rate',
     value: `${stats.occupancyRate.toFixed(1)}%`,
     icon: TrendingUp,
-    color: 'indigo',
   },
   {
     name: 'Monthly Revenue',
     value: `₦${(stats.totalMonthlyRevenue / 1000000).toFixed(1)}M`,
     icon: DollarSign,
-    color: 'emerald',
     href: '/admin/payments'
   },
   {
     name: 'Pending KYC',
     value: stats.pendingKYC,
     icon: Clock,
-    color: 'orange',
     href: '/admin/kyc'
   },
   {
     name: 'Active Complaints',
     value: stats.activeComplaints,
     icon: AlertCircle,
-    color: 'red',
     href: '/admin/complaints'
   },
   {
     name: 'Vacant Properties',
     value: stats.vacantProperties,
     icon: CheckCircle,
-    color: 'yellow',
     href: '/admin/vacancies'
   },
 ];
@@ -90,26 +82,16 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat) => {
           const Icon = stat.icon;
-          const colorClasses = {
-            blue: 'bg-blue-100 text-blue-600',
-            purple: 'bg-purple-100 text-purple-600',
-            green: 'bg-green-100 text-green-600',
-            indigo: 'bg-indigo-100 text-indigo-600',
-            emerald: 'bg-emerald-100 text-emerald-600',
-            orange: 'bg-orange-100 text-orange-600',
-            red: 'bg-red-100 text-red-600',
-            yellow: 'bg-yellow-100 text-yellow-600',
-          }[stat.color];
 
           const Card = (
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-600">{stat.name}</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
                 </div>
-                <div className={`p-3 rounded-lg ${colorClasses}`}>
-                  <Icon className="w-6 h-6" />
+                <div className="p-3 rounded-lg bg-gray-100">
+                  <Icon className="w-6 h-6 text-gray-600" />
                 </div>
               </div>
             </div>
@@ -129,26 +111,39 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link
           href="/admin/owners/invite"
-          className="text-white rounded-xl p-6 hover:shadow-lg transition-shadow"
-          style={{ background: 'linear-gradient(to bottom right, #0B3D2C, #0F5240)' }}
+          className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
         >
-          <h3 className="text-lg font-semibold mb-2">Invite Property Owner</h3>
-          <p className="text-white/80 text-sm">Send onboarding email to new owners</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: '#E8F5E9' }}>
+              <Users className="w-5 h-5" style={{ color: '#0B3D2C' }} />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Invite Property Owner</h3>
+          </div>
+          <p className="text-gray-600 text-sm">Send onboarding email to new owners</p>
         </Link>
         <Link
           href="/admin/kyc"
-          className="text-white rounded-xl p-6 hover:shadow-lg transition-shadow"
-          style={{ background: 'linear-gradient(to bottom right, #B87333, #CA8E56)' }}
+          className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
         >
-          <h3 className="text-lg font-semibold mb-2">Review KYC Applications</h3>
-          <p className="text-white/80 text-sm">{stats.pendingKYC} pending review</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: '#FFF3E8' }}>
+              <UserCheck className="w-5 h-5" style={{ color: '#B87333' }} />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Review KYC Applications</h3>
+          </div>
+          <p className="text-gray-600 text-sm">{stats.pendingKYC} pending review</p>
         </Link>
         <Link
           href="/admin/complaints"
-          className="bg-gradient-to-br from-red-600 to-red-700 text-white rounded-xl p-6 hover:shadow-lg transition-shadow"
+          className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
         >
-          <h3 className="text-lg font-semibold mb-2">Handle Complaints</h3>
-          <p className="text-red-100 text-sm">{stats.activeComplaints} active issues</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-gray-100">
+              <AlertCircle className="w-5 h-5 text-gray-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Handle Complaints</h3>
+          </div>
+          <p className="text-gray-600 text-sm">{stats.activeComplaints} active issues</p>
         </Link>
       </div>
 
@@ -158,7 +153,8 @@ export default function AdminDashboard() {
           <h2 className="text-2xl font-bold text-gray-900">Properties Overview</h2>
           <Link
             href="/admin/owners"
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            className="text-sm font-medium hover:opacity-80 transition-opacity"
+            style={{ color: '#0B3D2C' }}
           >
             View All →
           </Link>

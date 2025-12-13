@@ -19,6 +19,7 @@ import {
   FileText,
   User,
   Home,
+  Pencil,
 } from 'lucide-react';
 import {
   mockTenants,
@@ -188,6 +189,14 @@ export default function TenantProfilePage() {
               </div>
             </div>
           </div>
+          {/* Edit Button */}
+          <Link
+            href={`/admin/tenants/${tenant.id}/edit`}
+            className="px-4 py-2 rounded-lg font-medium transition-colors flex items-center border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            Edit Tenant
+          </Link>
         </div>
       </div>
 

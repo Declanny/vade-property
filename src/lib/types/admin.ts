@@ -35,6 +35,9 @@ export interface PropertyOwner {
   lastName: string;
   phone: string;
   address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   role: 'property_owner';
   status: 'active' | 'inactive' | 'pending';
   inviteToken?: string;
@@ -44,6 +47,12 @@ export interface PropertyOwner {
   totalProperties: number;
   totalTenants: number;
   monthlyRevenue: number;
+  propertiesCount?: number;
+  bankAccountDetails?: {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  };
 }
 
 export interface Property {
@@ -85,12 +94,26 @@ export interface Tenant {
   moveInDate?: string;
   moveOutDate?: string;
   rentAmount?: number;
+  monthlyRent?: number;
   rentStatus: RentStatus;
   lastPaymentDate?: string;
   nextPaymentDue?: string;
   outstandingBalance: number;
   createdAt: string;
   documents: KYCDocument[];
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  employmentInfo?: {
+    employer?: string;
+    employerName?: string;
+    position?: string;
+    jobTitle?: string;
+    income?: string;
+    monthlyIncome?: number;
+  };
 }
 
 export interface KYCDocument {
