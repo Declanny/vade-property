@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { mockTenants } from '@/lib/data/adminMock';
-import { Mail, Phone, Home, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Phone, Home, Calendar, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 
 export default function TenantsPage() {
   const tenants = mockTenants;
@@ -31,9 +32,19 @@ export default function TenantsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Tenants</h1>
-        <p className="text-gray-600 mt-1">Manage all tenants across properties</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Tenants</h1>
+          <p className="text-gray-600 mt-1">Manage all tenants across properties</p>
+        </div>
+        <Link
+          href="/admin/tenants/add"
+          className="text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center"
+          style={{ backgroundColor: '#B87333' }}
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Add Tenant
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -77,7 +88,12 @@ export default function TenantsPage() {
                         {tenant.firstName[0]}{tenant.lastName[0]}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{tenant.firstName} {tenant.lastName}</p>
+                        <Link
+                          href={`/admin/tenants/${tenant.id}`}
+                          className="font-medium text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#B87333] hover:decoration-[#B87333] transition-colors"
+                        >
+                          {tenant.firstName} {tenant.lastName}
+                        </Link>
                         <p className="text-xs text-gray-500">ID: {tenant.id}</p>
                       </div>
                     </div>
@@ -108,9 +124,12 @@ export default function TenantsPage() {
                     </p>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    <Link
+                      href={`/admin/tenants/${tenant.id}`}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
                       View Details
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

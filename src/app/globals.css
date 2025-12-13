@@ -51,3 +51,42 @@ body {
   color: var(--foreground);
   font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
 }
+
+/* Leaflet Map Popup Styling */
+.leaflet-popup-content-wrapper {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.leaflet-popup-tip {
+  background: white !important;
+}
+
+/* Remove default close button styling */
+.leaflet-popup-close-button {
+  color: #000 !important;
+  font-size: 20px !important;
+  padding: 4px 8px !important;
+  right: 4px !important;
+  top: 4px !important;
+  z-index: 10;
+  background: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #000 !important;
+  background: #f3f4f6;
+}

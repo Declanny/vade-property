@@ -3,5 +3,8 @@ export default function MapLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  // This layout wraps the map page
+  // The parent (public) layout already has Header
+  // We just pass through the children
+  return <div className="h-full">{children}</div>;
 }

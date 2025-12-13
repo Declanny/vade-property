@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, Shield, User, LogIn } from "lucide-react";
 import { Button } from "../ui/Button";
 import Logo from "../ui/Logo";
@@ -9,6 +10,7 @@ import { Container } from "./Container";
 
 export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -91,25 +93,27 @@ export const Header: React.FC = () => {
         )}
       </Container>
 
-      {/* Trust Badge Bar */}
-      <div className="bg-primary-light/10 border-t border-primary/10">
-        <Container>
-          <div className="flex items-center justify-center py-2 gap-6 text-sm">
-            <div className="flex items-center gap-2 text-primary">
-              <Shield className="w-4 h-4" />
-              <span className="font-medium">Lawyer Verified Properties</span>
+      {/* Trust Badge Bar - Hidden on map page */}
+      {pathname !== '/properties/map' && (
+        <div className="bg-primary-light/10 border-t border-primary/10">
+          <Container>
+            <div className="flex items-center justify-center py-2 gap-6 text-sm">
+              <div className="flex items-center gap-2 text-primary">
+                <Shield className="w-4 h-4" />
+                <span className="font-medium">Lawyer Verified Properties</span>
+              </div>
+              <div className="hidden sm:block text-gray-400">|</div>
+              <div className="hidden sm:flex items-center gap-2 text-gray-700">
+                <span>Secure Payments</span>
+              </div>
+              <div className="hidden sm:block text-gray-400">|</div>
+              <div className="hidden sm:flex items-center gap-2 text-gray-700">
+                <span>Flexible Payment Plans</span>
+              </div>
             </div>
-            <div className="hidden sm:block text-gray-400">|</div>
-            <div className="hidden sm:flex items-center gap-2 text-gray-700">
-              <span>Secure Payments</span>
-            </div>
-            <div className="hidden sm:block text-gray-400">|</div>
-            <div className="hidden sm:flex items-center gap-2 text-gray-700">
-              <span>Flexible Payment Plans</span>
-            </div>
-          </div>
-        </Container>
-      </div>
+          </Container>
+        </div>
+      )}
     </header>
   );
 };

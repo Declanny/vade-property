@@ -1,10 +1,27 @@
 'use client';
 
+import { useState, useCallback } from 'react';
+import Link from 'next/link';
 import { mockProperties, mockPropertyOwners, mockTenants } from '@/lib/data/adminMock';
-import { Home, MapPin, DollarSign, User } from 'lucide-react';
+import { PropertyCard } from '@/components/property/PropertyCard';
+import type { Property as PublicProperty } from '@/lib/types';
+import type { Property as AdminProperty } from '@/lib/types/admin';
 
 export default function PropertiesPage() {
   const properties = mockProperties;
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const handleFavorite = useCallback((propertyId: string) => {
+    setFavorites((prev) => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(propertyId)) {
+        newFavorites.delete(propertyId);
+      } else {
+        newFavorites.add(propertyId);
+      }
+      return newFavorites;
+    });
+  }, []);
 
   const getOwnerName = (ownerId: string) => {
     const owner = mockPropertyOwners.find(o => o.id === ownerId);
@@ -23,6 +40,51 @@ export default function PropertiesPage() {
       currency: 'NGN',
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // Convert admin property to public property format for PropertyCard
+  const convertToPublicProperty = (adminProp: AdminProperty): PublicProperty => {
+    // Use existing images from public folder since admin mock images don't exist
+    const propertyImages = [
+      '/propertymain.avif',
+      '/section2prop.png',
+      '/section3prop.png',
+      '/section4prop.png',
+    ];
+    
+    // Randomly select an image based on property ID for consistency
+    const imageIndex = parseInt(adminProp.id.split('-')[1] || '1', 10) % propertyImages.length;
+    
+    return {
+      id: adminProp.id,
+      ownerId: adminProp.ownerId,
+      title: adminProp.name,
+      description: adminProp.description,
+      type: adminProp.type,
+      address: adminProp.address,
+      city: adminProp.city,
+      state: adminProp.state,
+      country: 'Nigeria',
+      zipCode: adminProp.zipCode,
+      latitude: 6.5244, // Default Lagos coordinates
+      longitude: 3.3792,
+      price: adminProp.monthlyRent,
+      currency: 'NGN',
+      paymentPlans: ['1_month', '3_months', '6_months', '12_months'],
+      bedrooms: adminProp.bedrooms,
+      bathrooms: adminProp.bathrooms,
+      area: adminProp.area,
+      areaUnit: 'sqft',
+      amenities: adminProp.amenities,
+      images: [propertyImages[imageIndex]],
+      verified: adminProp.status === 'occupied' || adminProp.status === 'vacant',
+      status: adminProp.status === 'occupied' ? 'rented' : 'active',
+      featured: false,
+      rating: 4.5,
+      reviewCount: 0,
+      createdAt: new Date(adminProp.createdAt),
+      updatedAt: new Date(adminProp.updatedAt),
+    } as PublicProperty;
   };
 
   const getStatusBadge = (status: string) => {
@@ -72,47 +134,42 @@ export default function PropertiesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
         {properties.map((property) => (
-          <div key={property.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="h-40 bg-gradient-to-br from-blue-400 to-purple-500 relative">
-              <div className="absolute top-3 right-3">
+          <div key={property.id} className="relative">
+            <PropertyCard
+              property={convertToPublicProperty(property)}
+              onFavorite={handleFavorite}
+              isFavorite={favorites.has(property.id)}
+            />
+            {/* Admin Info Overlay */}
+            <div className="mt-3 bg-white rounded-lg border border-gray-200 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600">Status</span>
                 {getStatusBadge(property.status)}
               </div>
-            </div>
-            <div className="p-5 space-y-3">
-              <h3 className="text-lg font-bold text-gray-900">{property.name}</h3>
-              <div className="flex items-start text-sm text-gray-600">
-                <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" />
-                <p>{property.address}, {property.city}</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Owner</span>
+                <Link
+                  href={`/admin/owners/${property.ownerId}`}
+                  className="font-medium text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#0B3D2C] hover:decoration-[#0B3D2C] transition-colors"
+                >
+                  {getOwnerName(property.ownerId)}
+                </Link>
               </div>
-
-              <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
-                <div>{property.bedrooms} bed</div>
-                <div>{property.bathrooms} bath</div>
-                <div>{property.area} sqft</div>
-              </div>
-
-              <div className="border-t border-gray-200 pt-3 space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Monthly Rent</span>
-                  <span className="font-bold text-blue-600">{formatCurrency(property.monthlyRent)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Owner</span>
-                  <span className="font-medium text-gray-900">{getOwnerName(property.ownerId)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Tenant</span>
-                  <span className={`font-medium ${property.currentTenantId ? 'text-green-700' : 'text-yellow-700'}`}>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Tenant</span>
+                {property.currentTenantId ? (
+                  <Link
+                    href={`/admin/tenants/${property.currentTenantId}`}
+                    className="font-medium text-green-700 underline decoration-1 underline-offset-2 hover:text-[#B87333] hover:decoration-[#B87333] transition-colors"
+                  >
                     {getTenantName(property.currentTenantId)}
-                  </span>
-                </div>
+                  </Link>
+                ) : (
+                  <span className="font-medium text-yellow-700">Vacant</span>
+                )}
               </div>
-
-              <button className="w-full text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-colors" style={{ backgroundColor: '#0B3D2C' }}>
-                View Details
-              </button>
             </div>
           </div>
         ))}

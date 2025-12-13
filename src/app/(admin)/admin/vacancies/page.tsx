@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { mockProperties, mockPropertyOwners } from '@/lib/data/adminMock';
 import { Home, MapPin, DollarSign, Bed, Bath, Maximize, Eye, EyeOff, Plus } from 'lucide-react';
 
@@ -135,7 +136,12 @@ export default function VacanciesPage() {
                   {/* Owner */}
                   <div className="text-sm">
                     <p className="text-gray-600">Owner</p>
-                    <p className="font-medium text-gray-900">{getOwnerName(property.ownerId)}</p>
+                    <Link
+                      href={`/admin/owners/${property.ownerId}`}
+                      className="font-medium text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#0B3D2C] hover:decoration-[#0B3D2C] transition-colors"
+                    >
+                      {getOwnerName(property.ownerId)}
+                    </Link>
                   </div>
 
                   {/* Amenities */}

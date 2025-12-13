@@ -155,26 +155,76 @@ export default function PropertyMap({
                 mouseout: () => onPropertyHover?.(null),
               }}
             >
-              <Popup>
-                <div className="p-2">
-                  <img
-                    src={property.images[0]}
-                    alt={property.title}
-                    className="w-48 h-32 object-cover rounded mb-2"
-                  />
-                  <h3 className="font-semibold text-sm mb-1">{property.title}</h3>
-                  <p className="text-xs text-gray-600 mb-1">{property.address}</p>
-                  <p className="font-bold" style={{ color: '#0B3D2C' }}>
-                    ₦{property.price.toLocaleString('en-NG')}/mo
-                  </p>
-                  <button
-                    onClick={() => onPropertyClick(property.id)}
-                    className="mt-2 w-full text-xs px-3 py-1 rounded text-white hover:opacity-90"
-                    style={{ backgroundColor: '#0B3D2C' }}
-                  >
-                    View Details
-                  </button>
-                </div>
+              <Popup className="property-map-popup">
+                <a 
+                  href={`/property/${property.id}`}
+                  className="block bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" 
+                  style={{ minWidth: '280px' }}
+                >
+                  {/* Image */}
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={property.images[0]}
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Verified Badge */}
+                    {property.verified && (
+                      <div className="absolute top-2 left-2">
+                        <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold text-primary flex items-center gap-1">
+                          <div className="w-2 h-2 bg-success rounded-full"></div>
+                          Verified
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-3 bg-white">
+                    {/* Location */}
+                    <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span className="truncate">{property.city}</span>
+                    </div>
+                    
+                    {/* Title */}
+                    <h3 className="font-medium text-sm text-gray-900 line-clamp-2 mb-2">
+                      {property.title}
+                    </h3>
+                    
+                    {/* Rating and Price */}
+                    <div className="flex items-center justify-between">
+                      {property.rating ? (
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 fill-black text-black" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                          <span className="text-xs font-medium text-gray-900">
+                            {property.rating.toFixed(1)}
+                          </span>
+                          {property.reviewCount > 0 && (
+                            <span className="text-xs text-gray-500">
+                              ({property.reviewCount})
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-gray-400">New listing</div>
+                      )}
+                      
+                      {/* Price */}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-sm font-semibold text-gray-900">
+                          ₦{property.price.toLocaleString('en-NG')}
+                        </span>
+                        <span className="text-xs text-gray-600">/mo</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
               </Popup>
             </Marker>
           );

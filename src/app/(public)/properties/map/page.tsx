@@ -110,83 +110,77 @@ export default function PropertiesMapPage() {
   }, []);
 
   return (
-    <div className="h-screen bg-gray-50 overflow-hidden">
-      {/* Main Content - Full Screen Split Layout */}
-      <div className="relative h-full">
-        {/* Properties List - Left Side (Scrollable) */}
-        <div className="lg:w-1/2 h-full overflow-y-auto">
-          <Container>
-            <div className="py-6 space-y-6">
-              {propertiesByArea.length > 0 ? (
-                propertiesByArea.map(([area, properties]) => (
-                  <div key={area} id={`area-${area}`}>
-                    {/* Area Header */}
-                    <div className="mb-4">
-                      <button
-                        onClick={() => toggleAreaCollapse(area)}
-                        className="flex items-center justify-between w-full group"
-                      >
-                        <div>
-                          <h2 className="text-xl font-bold text-gray-900 group-hover:underline">
-                            {area}
-                          </h2>
-                          <p className="text-sm text-gray-600">
-                            {properties.length} {properties.length === 1 ? 'property' : 'properties'}
-                          </p>
-                        </div>
-                        <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                          {collapsedAreas.has(area) ? (
-                            <ChevronDown className="w-5 h-5 text-gray-600" />
-                          ) : (
-                            <ChevronUp className="w-5 h-5 text-gray-600" />
-                          )}
-                        </div>
-                      </button>
-                    </div>
-
-                    {/* Properties Grid - 3 COLUMNS */}
-                    {!collapsedAreas.has(area) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                        {properties.map((property) => (
-                          <PropertyCard
-                            key={property.id}
-                            property={property}
-                            onFavorite={handleFavorite}
-                            isFavorite={favorites.has(property.id)}
-                          />
-                        ))}
+    <div className="bg-gray-50">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* 55/45 Split Layout */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Side - Scrollable Properties List (55%) */}
+          <div className="w-full lg:w-[55%] space-y-6">
+            {propertiesByArea.length > 0 ? (
+              propertiesByArea.map(([area, properties]) => (
+                <div key={area} id={`area-${area}`}>
+                  {/* Area Header */}
+                  <div className="mb-4">
+                    <button
+                      onClick={() => toggleAreaCollapse(area)}
+                      className="flex items-center justify-between w-full group"
+                    >
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900 group-hover:underline">
+                          {area}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          {properties.length} {properties.length === 1 ? 'property' : 'properties'}
+                        </p>
                       </div>
-                    )}
+                      <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        {collapsedAreas.has(area) ? (
+                          <ChevronDown className="w-5 h-5 text-gray-600" />
+                        ) : (
+                          <ChevronUp className="w-5 h-5 text-gray-600" />
+                        )}
+                      </div>
+                    </button>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-20">
-                  <div className="text-6xl mb-4">🏠</div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                    No properties found
-                  </h3>
-                  <p className="text-gray-600">
-                    Check back soon for new listings
-                  </p>
-                </div>
-              )}
-            </div>
-          </Container>
-        </div>
 
-        {/* Map - Right Side (Fixed Full Screen) with Border Radius */}
-        <div className="hidden lg:block fixed top-0 right-0 w-1/2 h-screen">
-          <div className="h-full px-4 sm:px-6 lg:px-8">
-            <div className="py-6 h-full">
-              <div className="h-full w-full rounded-2xl overflow-hidden shadow-lg">
-                <PropertyMap
-                  properties={filteredProperties}
-                  selectedPropertyId={selectedPropertyId}
-                  hoveredPropertyId={hoveredPropertyId}
-                  onPropertyClick={handlePropertyClick}
-                  onPropertyHover={setHoveredPropertyId}
-                />
+                  {/* Properties Grid - 3 COLUMNS */}
+                  {!collapsedAreas.has(area) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
+                      {properties.map((property) => (
+                        <PropertyCard
+                          key={property.id}
+                          property={property}
+                          onFavorite={handleFavorite}
+                          isFavorite={favorites.has(property.id)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🏠</div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                  No properties found
+                </h3>
+                <p className="text-gray-600">
+                  Check back soon for new listings
+                </p>
               </div>
+            )}
+          </div>
+
+          {/* Right Side - Sticky Map (45%) - Like Shopping Cart Summary */}
+          <div className="hidden lg:block lg:w-[45%]">
+            <div className="sticky top-20 h-[calc(100vh-6rem)] rounded-xl overflow-hidden shadow-lg">
+              <PropertyMap
+                properties={filteredProperties}
+                selectedPropertyId={selectedPropertyId}
+                hoveredPropertyId={hoveredPropertyId}
+                onPropertyClick={handlePropertyClick}
+                onPropertyHover={setHoveredPropertyId}
+              />
             </div>
           </div>
         </div>

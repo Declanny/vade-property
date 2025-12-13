@@ -110,9 +110,12 @@ export default function OwnersPage() {
                         {owner.firstName[0]}{owner.lastName[0]}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <Link
+                          href={`/admin/owners/${owner.id}`}
+                          className="font-medium text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#0B3D2C] hover:decoration-[#0B3D2C] transition-colors"
+                        >
                           {owner.firstName} {owner.lastName}
-                        </p>
+                        </Link>
                         {owner.address && (
                           <p className="text-sm text-gray-500">{owner.address}</p>
                         )}
@@ -162,9 +165,12 @@ export default function OwnersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      <Link
+                        href={`/admin/owners/${owner.id}`}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
                         View
-                      </button>
+                      </Link>
                       {owner.status === 'pending' && (
                         <button className="text-green-600 hover:text-green-700 text-sm font-medium">
                           Resend

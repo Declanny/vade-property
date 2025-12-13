@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown, ChevronRight, User, Home, MapPin, Calendar, DollarSign, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import type { OwnerWithProperties } from '@/lib/types/admin';
 
@@ -103,9 +104,13 @@ export default function OwnerPropertyHierarchy({ owners }: Props) {
 
                   {/* Owner Info */}
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <Link
+                      href={`/admin/owners/${owner.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-lg font-semibold text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#0B3D2C] hover:decoration-[#0B3D2C] transition-colors"
+                    >
                       {owner.firstName} {owner.lastName}
-                    </h3>
+                    </Link>
                     <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
                       <span className="flex items-center">
                         <User className="w-4 h-4 mr-1" />
@@ -221,9 +226,13 @@ export default function OwnerPropertyHierarchy({ owners }: Props) {
                             {tenant ? (
                               <div className="flex items-center space-x-3">
                                 <div className="text-right">
-                                  <p className="text-sm font-medium text-gray-900">
+                                  <Link
+                                    href={`/admin/tenants/${tenant.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-sm font-medium text-gray-900 underline decoration-1 underline-offset-2 hover:text-[#B87333] hover:decoration-[#B87333] transition-colors"
+                                  >
                                     {tenant.firstName} {tenant.lastName}
-                                  </p>
+                                  </Link>
                                   <div className="flex items-center space-x-2 mt-1">
                                     {getRentStatusBadge(tenant.rentStatus)}
                                   </div>
