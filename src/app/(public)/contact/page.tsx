@@ -5,8 +5,18 @@ import { Container } from "@/components/layout/Container";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from "lucide-react";
+import dynamic from "next/dynamic";
+
+// Dynamically import the map to avoid SSR issues
+const ContactMap = dynamic(() => import("@/components/contact/ContactMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100 flex items-center justify-center min-h-[400px]">
+      <div className="text-gray-500">Loading map...</div>
+    </div>
+  ),
+});
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -22,7 +32,6 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     alert("Message sent successfully! We'll get back to you soon.");
@@ -39,8 +48,8 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: "Email",
-      details: ["info@vadeproperty.com", "support@vadeproperty.com"],
-      link: "mailto:info@vadeproperty.com",
+      details: ["info@truvade.com", "support@truvade.com"],
+      link: "mailto:info@truvade.com",
     },
     {
       icon: MapPin,
@@ -57,129 +66,183 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="bg-gray-50 py-12">
-      <Container>
-        {/* Header */}
-        <div className="text-center mb-12">
-          <Badge variant="primary" size="lg" className="mb-4">
-            Get in Touch
-          </Badge>
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Contact Us
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Have questions? We're here to help. Send us a message and we'll respond as soon as possible.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-primary text-white py-16">
+        <Container>
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+              Get in Touch
+            </h1>
+            <p className="text-lg text-white/80">
+              Have questions about finding your perfect property? Our team is here to help you every step of the way.
+            </p>
+          </div>
+        </Container>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Contact Info Cards */}
-          {contactInfo.map((info) => {
-            const Icon = info.icon;
-            return (
-              <Card key={info.title} variant="elevated" padding="lg" className="text-center">
-                <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-7 h-7 text-primary" />
+      <Container className="py-12">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 -mt-20">
+          {/* Contact Form Card */}
+          <Card variant="elevated" padding="lg" className="h-fit">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <MessageCircle className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Send Us a Message</h2>
+                <p className="text-sm text-gray-500">We typically respond within 24 hours</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Your Name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  fullWidth
+                />
+                <Input
+                  label="Email Address"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  fullWidth
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Phone Number"
+                  type="tel"
+                  placeholder="+234 800 000 0000"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  fullWidth
+                />
+                <Input
+                  label="Subject"
+                  type="text"
+                  placeholder="How can we help?"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  required
+                  fullWidth
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
+                <textarea
+                  rows={5}
+                  placeholder="Tell us more about your inquiry..."
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  required
+                  className="block w-full bg-white border border-gray-300 rounded-[var(--radius-button)] px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 resize-none"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={isSubmitting}
+                rightIcon={<Send className="w-5 h-5" />}
+              >
+                {isSubmitting ? "Sending..." : "Send Message"}
+              </Button>
+            </form>
+          </Card>
+
+          {/* Map and Contact Info */}
+          <div className="space-y-6">
+            {/* Map */}
+            <Card variant="elevated" padding="none" className="overflow-hidden">
+              <div className="h-[300px]">
+                <ContactMap />
+              </div>
+              <div className="p-4 bg-white border-t border-gray-100">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-900">TruVade Headquarters</p>
+                    <p className="text-sm text-gray-600">15 Marina Road, Lagos Island, Lagos, Nigeria</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-3">{info.title}</h3>
-                <div className="space-y-1">
-                  {info.details.map((detail, idx) => (
-                    <p key={idx} className="text-gray-600">
-                      {info.link && idx === 0 ? (
-                        <a href={info.link} className="hover:text-primary transition-colors">
-                          {detail}
-                        </a>
-                      ) : (
-                        detail
-                      )}
-                    </p>
-                  ))}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+              </div>
+            </Card>
 
-        {/* Contact Form */}
-        <Card variant="elevated" padding="lg" className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Send Us a Message</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Your Name"
-                type="text"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                fullWidth
-              />
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                fullWidth
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Phone Number"
-                type="tel"
-                placeholder="+234 800 000 0000"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                fullWidth
-              />
-              <Input
-                label="Subject"
-                type="text"
-                placeholder="How can we help?"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                required
-                fullWidth
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
-              <textarea
-                rows={6}
-                placeholder="Tell us more about your inquiry..."
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                required
-                className="block w-full bg-white border border-gray-300 rounded-[var(--radius-button)] px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              fullWidth
-              loading={isSubmitting}
-              rightIcon={<Send className="w-5 h-5" />}
-            >
-              {isSubmitting ? "Sending..." : "Send Message"}
-            </Button>
-          </form>
-        </Card>
-
-        {/* Map Placeholder */}
-        <Card variant="bordered" padding="none" className="mt-12 overflow-hidden">
-          <div className="h-96 bg-gray-200 flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <MapPin className="w-16 h-16 mx-auto mb-4" />
-              <p className="text-lg">Map integration placeholder</p>
-              <p className="text-sm">15 Marina Road, Lagos Island, Lagos</p>
+            {/* Contact Info Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {contactInfo.map((info) => {
+                const Icon = info.icon;
+                return (
+                  <Card key={info.title} variant="elevated" padding="md" className="hover:shadow-lg transition-shadow">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-gray-900 text-sm mb-1">{info.title}</h3>
+                        <div className="space-y-0.5">
+                          {info.details.map((detail, idx) => (
+                            <p key={idx} className="text-sm text-gray-600 truncate">
+                              {info.link && idx === 0 ? (
+                                <a href={info.link} className="hover:text-primary transition-colors">
+                                  {detail}
+                                </a>
+                              ) : (
+                                detail
+                              )}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           </div>
-        </Card>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Frequently Asked Questions</h2>
+            <p className="text-gray-600">Quick answers to common questions</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                q: "How do I schedule a property viewing?",
+                a: "You can schedule a viewing directly on any property listing page or contact us via phone or email."
+              },
+              {
+                q: "What documents do I need to rent?",
+                a: "Typically you'll need valid ID, proof of income, and references. Requirements may vary by property."
+              },
+              {
+                q: "How long does the verification process take?",
+                a: "Property verification usually takes 24-48 hours after all documents are submitted."
+              },
+            ].map((faq, idx) => (
+              <Card key={idx} variant="bordered" padding="md">
+                <h3 className="font-medium text-gray-900 mb-2">{faq.q}</h3>
+                <p className="text-sm text-gray-600">{faq.a}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
       </Container>
     </div>
   );

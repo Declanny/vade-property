@@ -133,7 +133,7 @@ export default function OwnerProfilePage() {
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: Home },
     { id: 'properties' as TabType, label: 'All Properties', icon: Building2 },
-    { id: 'vacant' as TabType, label: 'Vacant Properties', icon: Building2, count: vacantProperties.length },
+    { id: 'vacant' as TabType, label: 'Vacant units', icon: Building2, count: vacantProperties.length },
     { id: 'payments' as TabType, label: 'Payments', icon: CreditCard },
     { id: 'complaints' as TabType, label: 'Complaints', icon: MessageSquare, count: ownerComplaints.filter(c => c.status !== 'resolved' && c.status !== 'closed').length },
   ];

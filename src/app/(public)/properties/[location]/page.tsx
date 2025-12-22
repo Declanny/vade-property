@@ -89,55 +89,51 @@ export default function LocationPage({ params }: LocationPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       {/* Simple Header - Airbnb Style */}
       <div className="bg-white border-b border-gray-200">
-        <Container>
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <h1 className="text-2xl font-semibold text-gray-900 mb-1">
               Over {locationProperties.length} properties in {locationMeta.name}
             </h1>
             <p className="text-gray-600">{locationMeta.description}</p>
           </div>
-        </Container>
+        </div>
       </div>
 
-      {/* Main Content - Split Layout */}
-      {locationProperties.length > 0 ? (
-        <div className="relative">
-          {/* Properties List - Left Side (Scrollable) - 3 COLUMNS */}
-          <div className="lg:w-1/2 lg:pr-4">
-            <Container>
-              <div className="py-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {locationProperties.map((property) => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                      onFavorite={handleFavorite}
-                      isFavorite={favorites.has(property.id)}
-                    />
-                  ))}
-                </div>
+      {/* Main Content - 55/45 Split Layout like Map Page */}
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {locationProperties.length > 0 ? (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Left Side - Scrollable Properties List (55%) */}
+            <div className="w-full lg:w-[55%] space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {locationProperties.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
+                    onFavorite={handleFavorite}
+                    isFavorite={favorites.has(property.id)}
+                  />
+                ))}
               </div>
-            </Container>
-          </div>
+            </div>
 
-          {/* Map - Right Side (Sticky) with Border Radius */}
-          <div className="hidden lg:block fixed top-[120px] right-0 w-1/2 h-[calc(100vh-120px)] p-6">
-            <div className="h-full w-full rounded-2xl overflow-hidden shadow-lg">
-              <PropertyMap
-                properties={locationProperties}
-                selectedPropertyId={selectedPropertyId}
-                hoveredPropertyId={hoveredPropertyId}
-                onPropertyClick={handlePropertyClick}
-                onPropertyHover={setHoveredPropertyId}
-              />
+            {/* Right Side - Sticky Map (45%) */}
+            <div className="hidden lg:block lg:w-[45%]">
+              <div className="sticky top-20 h-[calc(100vh-6rem)] rounded-xl overflow-hidden shadow-lg">
+                <PropertyMap
+                  properties={locationProperties}
+                  selectedPropertyId={selectedPropertyId}
+                  hoveredPropertyId={hoveredPropertyId}
+                  onPropertyClick={handlePropertyClick}
+                  onPropertyHover={setHoveredPropertyId}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <Container>
+        ) : (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🏠</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -154,8 +150,8 @@ export default function LocationPage({ params }: LocationPageProps) {
               Browse All Properties
             </Link>
           </div>
-        </Container>
-      )}
+        )}
+      </div>
     </div>
   );
 }
