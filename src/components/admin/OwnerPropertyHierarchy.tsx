@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ChevronRight, User, Home, MapPin, Calendar, DollarSign, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import type { OwnerWithProperties } from '@/lib/types/admin';
+import { getPropertyTotalRent } from '@/lib/data/adminMock';
 
 interface Props {
   owners: OwnerWithProperties[];
@@ -218,7 +219,7 @@ export default function OwnerPropertyHierarchy({ owners }: Props) {
                                   {property.address}, {property.city}
                                 </span>
                                 <span>{property.bedrooms} bed • {property.bathrooms} bath</span>
-                                <span className="font-semibold text-gray-900">{formatCurrency(property.monthlyRent)}/mo</span>
+                                <span className="font-semibold text-gray-900">{formatCurrency(getPropertyTotalRent(property))}/mo</span>
                               </div>
                             </div>
 

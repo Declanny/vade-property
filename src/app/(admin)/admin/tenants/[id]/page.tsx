@@ -28,6 +28,7 @@ import {
   mockComplaints,
   mockLeaseAgreements,
   mockPropertyOwners,
+  getPropertyTotalRent,
 } from '@/lib/data/adminMock';
 
 type TabType = 'overview' | 'payments' | 'complaints' | 'documents' | 'lease';
@@ -315,7 +316,7 @@ export default function TenantProfilePage() {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900">
-                          {formatCurrency(tenantProperty.monthlyRent)}/mo
+                          {formatCurrency(getPropertyTotalRent(tenantProperty))}/mo
                         </p>
                       </div>
                     </div>

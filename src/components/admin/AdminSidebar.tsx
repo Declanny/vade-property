@@ -12,13 +12,15 @@ import {
   FileText,
   Settings,
   HomeIcon,
-  BarChart3
+  BarChart3,
+  CalendarDays
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Property Owners', href: '/admin/owners', icon: Building2 },
   { name: 'Properties', href: '/admin/properties', icon: HomeIcon },
+  { name: 'Shortlets', href: '/admin/shortlets', icon: CalendarDays },
   { name: 'Tenants', href: '/admin/tenants', icon: Users },
   { name: 'KYC Review', href: '/admin/kyc', icon: UserCheck, badge: 'pending' },
   { name: 'Payments', href: '/admin/payments', icon: CreditCard },

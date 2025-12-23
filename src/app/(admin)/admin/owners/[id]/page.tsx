@@ -21,6 +21,9 @@ import {
   MessageSquare,
   Plus,
   Pencil,
+  ChevronDown,
+  ChevronRight,
+  User,
 } from 'lucide-react';
 import {
   mockPropertyOwners,
@@ -28,6 +31,10 @@ import {
   mockPayments,
   mockComplaints,
   mockTenants,
+  isMultiUnitProperty,
+  getPropertyOccupancy,
+  getPropertyTotalRent,
+  getVacancyListings,
 } from '@/lib/data/adminMock';
 
 type TabType = 'overview' | 'properties' | 'vacant' | 'payments' | 'complaints';
@@ -36,6 +43,7 @@ export default function OwnerProfilePage() {
   const params = useParams();
   const ownerId = params.id as string;
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [expandedProperties, setExpandedProperties] = useState<Set<string>>(new Set());
 
   // Find owner and related data
   const owner = mockPropertyOwners.find((o) => o.id === ownerId);
@@ -43,18 +51,75 @@ export default function OwnerProfilePage() {
   const ownerPayments = mockPayments.filter((p) => p.ownerId === ownerId);
   const ownerComplaints = mockComplaints.filter((c) => c.ownerId === ownerId);
 
-  // Calculate stats
-  const stats = {
-    totalProperties: ownerProperties.length,
-    occupied: ownerProperties.filter((p) => p.status === 'occupied').length,
-    vacant: ownerProperties.filter((p) => p.status === 'vacant').length,
-    underReview: ownerProperties.filter((p) => p.status === 'under_review').length,
-    monthlyRevenue: ownerProperties.reduce((sum, p) => sum + p.monthlyRent, 0),
+  // Get vacant units for this owner
+  const ownerVacancies = getVacancyListings().filter((v) => v.ownerId === ownerId);
+
+  const toggleProperty = (propertyId: string) => {
+    setExpandedProperties((prev) => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(propertyId)) {
+        newExpanded.delete(propertyId);
+      } else {
+        newExpanded.add(propertyId);
+      }
+      return newExpanded;
+    });
   };
 
-  const vacantProperties = ownerProperties.filter(
-    (p) => p.status === 'vacant' || p.status === 'under_review'
-  );
+  // Calculate stats - now considers multi-unit properties
+  const calculateStats = () => {
+    let totalUnits = 0;
+    let occupied = 0;
+    let vacant = 0;
+    let underReview = 0;
+    let monthlyRevenue = 0;
+
+    ownerProperties.forEach(p => {
+      const occupancy = getPropertyOccupancy(p);
+      totalUnits += occupancy.total;
+      occupied += occupancy.occupied;
+      vacant += occupancy.vacant;
+      monthlyRevenue += getPropertyTotalRent(p);
+
+      // Count under_review status
+      if (p.status === 'under_review') {
+        underReview += isMultiUnitProperty(p) ? (p.units?.length || 1) : 1;
+      }
+    });
+
+    return {
+      totalProperties: ownerProperties.length,
+      totalUnits,
+      occupied,
+      vacant,
+      underReview,
+      monthlyRevenue,
+    };
+  };
+
+  const stats = calculateStats();
+
+  // Helper to get tenant by ID
+  const getTenant = (tenantId?: string) => {
+    if (!tenantId) return null;
+    return mockTenants.find((t) => t.id === tenantId);
+  };
+
+  // Get unit status badge
+  const getUnitStatusBadge = (status: string) => {
+    const badges: Record<string, { bg: string; text: string; label: string }> = {
+      occupied: { bg: 'bg-green-100', text: 'text-green-700', label: 'Occupied' },
+      vacant: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Vacant' },
+      maintenance: { bg: 'bg-red-100', text: 'text-red-700', label: 'Maintenance' },
+      reserved: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Reserved' },
+    };
+    const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status };
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -132,8 +197,8 @@ export default function OwnerProfilePage() {
 
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: Home },
-    { id: 'properties' as TabType, label: 'All Properties', icon: Building2 },
-    { id: 'vacant' as TabType, label: 'Vacant units', icon: Building2, count: vacantProperties.length },
+    { id: 'properties' as TabType, label: 'All Properties', icon: Building2, count: ownerProperties.length },
+    { id: 'vacant' as TabType, label: 'Vacant Units', icon: Building2, count: ownerVacancies.length },
     { id: 'payments' as TabType, label: 'Payments', icon: CreditCard },
     { id: 'complaints' as TabType, label: 'Complaints', icon: MessageSquare, count: ownerComplaints.filter(c => c.status !== 'resolved' && c.status !== 'closed').length },
   ];
@@ -313,7 +378,7 @@ export default function OwnerProfilePage() {
                         <div className="text-right">
                           {getStatusBadge(property.status)}
                           <p className="text-lg font-semibold text-gray-900 mt-2">
-                            {formatCurrency(property.monthlyRent)}/mo
+                            {formatCurrency(getPropertyTotalRent(property))}/mo
                           </p>
                         </div>
                       </div>
@@ -402,76 +467,235 @@ export default function OwnerProfilePage() {
           {activeTab === 'properties' && (
             <div>
               {ownerProperties.length > 0 ? (
-                <div className="grid gap-4">
-                  {ownerProperties.map((property) => (
-                    <div key={property.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-900">{property.name}</h4>
-                          <p className="text-sm text-gray-600">{property.address}, {property.city}, {property.state}</p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {property.type.charAt(0).toUpperCase() + property.type.slice(1)} | {property.bedrooms} bed, {property.bathrooms} bath, {property.area} sqft
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {property.amenities.slice(0, 4).map((amenity, i) => (
-                              <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                {amenity}
-                              </span>
-                            ))}
-                            {property.amenities.length > 4 && (
-                              <span className="text-xs text-gray-500">+{property.amenities.length - 4} more</span>
-                            )}
+                <div className="space-y-4">
+                  {ownerProperties.map((property) => {
+                    const isExpanded = expandedProperties.has(property.id);
+                    const isMultiUnit = isMultiUnitProperty(property);
+                    const occupancy = getPropertyOccupancy(property);
+
+                    return (
+                      <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                        {/* Property Header - Clickable */}
+                        <button
+                          onClick={() => toggleProperty(property.id)}
+                          className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3">
+                              <div className="mt-1">
+                                {isExpanded ? (
+                                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-medium text-gray-900">{property.name}</h4>
+                                  {isMultiUnit && (
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                      {occupancy.total} units
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600">{property.address}, {property.city}, {property.state}</p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
+                                  {!isMultiUnit && ` | ${property.bedrooms} bed, ${property.bathrooms} bath, ${property.area} sqft`}
+                                </p>
+                                {isMultiUnit && (
+                                  <div className="flex gap-3 mt-2 text-xs">
+                                    <span className="text-green-600">{occupancy.occupied} occupied</span>
+                                    <span className="text-yellow-600">{occupancy.vacant} vacant</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {getStatusBadge(property.status)}
+                              <p className="text-lg font-semibold text-gray-900 mt-2">
+                                {formatCurrency(getPropertyTotalRent(property))}/mo
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          {getStatusBadge(property.status)}
-                          <p className="text-lg font-semibold text-gray-900 mt-2">
-                            {formatCurrency(property.monthlyRent)}/mo
-                          </p>
-                        </div>
+                        </button>
+
+                        {/* Expanded Content - Units/Tenant */}
+                        {isExpanded && (
+                          <div className="border-t border-gray-200 bg-gray-50 p-4">
+                            {isMultiUnit && property.units ? (
+                              <div className="space-y-3">
+                                <h5 className="text-sm font-medium text-gray-700 mb-3">Units</h5>
+                                {property.units.map((unit) => {
+                                  const unitTenant = getTenant(unit.currentTenantId);
+                                  return (
+                                    <div
+                                      key={unit.id}
+                                      className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                          <Home className="w-5 h-5 text-gray-500" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium text-gray-900">{unit.name}</p>
+                                          <p className="text-xs text-gray-500">
+                                            {unit.bedrooms} bed, {unit.bathrooms} bath, {unit.area} sqft
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-4">
+                                        {unitTenant ? (
+                                          <Link
+                                            href={`/admin/tenants/${unitTenant.id}`}
+                                            className="flex items-center gap-2 text-sm hover:underline"
+                                            style={{ color: '#0B3D2C' }}
+                                          >
+                                            <User className="w-4 h-4" />
+                                            {unitTenant.firstName} {unitTenant.lastName}
+                                          </Link>
+                                        ) : (
+                                          <span className="text-sm text-yellow-600">No tenant</span>
+                                        )}
+                                        <div className="text-right">
+                                          {getUnitStatusBadge(unit.status)}
+                                          <p className="text-sm font-medium text-gray-900 mt-1">
+                                            {formatCurrency(unit.monthlyRent)}/mo
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              // Single unit property
+                              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-gray-600 mb-1">Property Details</p>
+                                    <p className="text-sm text-gray-500">
+                                      {property.bedrooms} bed, {property.bathrooms} bath, {property.area} sqft
+                                    </p>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {property.amenities.slice(0, 4).map((amenity, i) => (
+                                        <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                          {amenity}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    {property.currentTenantId ? (
+                                      <Link
+                                        href={`/admin/tenants/${property.currentTenantId}`}
+                                        className="flex items-center gap-2 text-sm hover:underline"
+                                        style={{ color: '#0B3D2C' }}
+                                      >
+                                        <User className="w-4 h-4" />
+                                        {getTenantName(property.currentTenantId)}
+                                      </Link>
+                                    ) : (
+                                      <span className="text-sm text-yellow-600 flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        Vacant
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* View Property Link */}
+                            <div className="mt-3 pt-3 border-t border-gray-200 flex justify-end">
+                              <Link
+                                href={`/admin/properties/${property.id}`}
+                                className="text-sm font-medium hover:underline"
+                                style={{ color: '#0B3D2C' }}
+                              >
+                                View Property Details →
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {property.currentTenantId && (
-                        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
-                          <Users className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm text-gray-600">
-                            Tenant: {getTenantName(property.currentTenantId)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">No properties yet</p>
+                <div className="text-center py-8">
+                  <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No properties yet</p>
+                  <Link
+                    href={`/admin/properties/add?ownerId=${owner.id}`}
+                    className="mt-4 inline-flex items-center text-sm font-medium hover:underline"
+                    style={{ color: '#0B3D2C' }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Property
+                  </Link>
+                </div>
               )}
             </div>
           )}
 
-          {/* Vacant Properties Tab */}
+          {/* Vacant Units Tab */}
           {activeTab === 'vacant' && (
             <div>
-              {vacantProperties.length > 0 ? (
-                <div className="grid gap-4">
-                  {vacantProperties.map((property) => (
-                    <div key={property.id} className="border border-gray-200 rounded-lg p-4">
+              {ownerVacancies.length > 0 ? (
+                <div className="space-y-4">
+                  {ownerVacancies.map((vacancy) => (
+                    <div key={vacancy.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-medium text-gray-900">{property.name}</h4>
-                          <p className="text-sm text-gray-600">{property.address}, {property.city}, {property.state}</p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {property.type.charAt(0).toUpperCase() + property.type.slice(1)} | {property.bedrooms} bed, {property.bathrooms} bath, {property.area} sqft
-                          </p>
-                          {property.availableFrom && (
-                            <p className="text-sm text-green-600 mt-2">
-                              Available from: {new Date(property.availableFrom).toLocaleDateString('en-NG')}
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-gray-900">{vacancy.name}</h4>
+                            {vacancy.type === 'unit' && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                Unit
+                              </span>
+                            )}
+                          </div>
+                          {vacancy.type === 'unit' && (
+                            <p className="text-xs text-gray-500 mb-1">
+                              Building: {vacancy.propertyName}
                             </p>
+                          )}
+                          <p className="text-sm text-gray-600">{vacancy.address}, {vacancy.city}, {vacancy.state}</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {vacancy.bedrooms} bed, {vacancy.bathrooms} bath, {vacancy.area} sqft
+                          </p>
+                          {vacancy.availableFrom && (
+                            <p className="text-sm text-green-600 mt-2">
+                              Available from: {new Date(vacancy.availableFrom).toLocaleDateString('en-NG')}
+                            </p>
+                          )}
+                          {vacancy.amenities.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {vacancy.amenities.slice(0, 3).map((amenity, i) => (
+                                <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                  {amenity}
+                                </span>
+                              ))}
+                              {vacancy.amenities.length > 3 && (
+                                <span className="text-xs text-gray-500">+{vacancy.amenities.length - 3} more</span>
+                              )}
+                            </div>
                           )}
                         </div>
                         <div className="text-right">
-                          {getStatusBadge(property.status)}
+                          {getUnitStatusBadge(vacancy.status)}
                           <p className="text-lg font-semibold text-gray-900 mt-2">
-                            {formatCurrency(property.monthlyRent)}/mo
+                            {formatCurrency(vacancy.monthlyRent)}/mo
                           </p>
+                          <Link
+                            href={`/admin/tenants/add?ownerId=${owner.id}&propertyId=${vacancy.propertyId}${vacancy.unitId ? `&unitId=${vacancy.unitId}` : ''}`}
+                            className="mt-2 inline-flex items-center text-xs font-medium hover:underline"
+                            style={{ color: '#B87333' }}
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Assign Tenant
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -479,9 +703,9 @@ export default function OwnerProfilePage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No vacant properties</p>
-                  <p className="text-sm text-gray-400 mt-1">All properties are currently occupied</p>
+                  <Check className="w-12 h-12 text-green-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No vacant units</p>
+                  <p className="text-sm text-gray-400 mt-1">All properties and units are currently occupied</p>
                 </div>
               )}
             </div>

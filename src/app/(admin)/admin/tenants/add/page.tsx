@@ -15,13 +15,15 @@ import {
   X,
   CheckCircle,
 } from 'lucide-react';
-import { mockPropertyOwners, mockProperties } from '@/lib/data/adminMock';
+import { mockPropertyOwners, mockProperties, getPropertyTotalRent, isMultiUnitProperty, getUnitById } from '@/lib/data/adminMock';
+import type { Unit } from '@/lib/types/admin';
 
 type Step = 1 | 2 | 3;
 
 interface TenantFormData {
   ownerId: string;
   propertyId: string;
+  unitId: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -39,14 +41,24 @@ export default function AddTenantPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedOwnerId = searchParams.get('ownerId');
+  const preselectedPropertyId = searchParams.get('propertyId');
+  const preselectedUnitId = searchParams.get('unitId');
 
-  const [currentStep, setCurrentStep] = useState<Step>(preselectedOwnerId ? 2 : 1);
+  // Determine initial step based on preselected values
+  const getInitialStep = (): Step => {
+    if (preselectedPropertyId) return 3; // Go straight to tenant details
+    if (preselectedOwnerId) return 2; // Go to property selection
+    return 1; // Start from owner selection
+  };
+
+  const [currentStep, setCurrentStep] = useState<Step>(getInitialStep());
   const [ownerSearch, setOwnerSearch] = useState('');
   const [propertySearch, setPropertySearch] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState<TenantFormData>({
     ownerId: preselectedOwnerId || '',
-    propertyId: '',
+    propertyId: preselectedPropertyId || '',
+    unitId: preselectedUnitId || '',
     firstName: '',
     lastName: '',
     email: '',
@@ -94,17 +106,34 @@ export default function AddTenantPage() {
   );
   const selectedOwner = mockPropertyOwners.find((o) => o.id === formData.ownerId);
   const selectedProperty = mockProperties.find((p) => p.id === formData.propertyId);
+  const selectedUnit = formData.unitId ? getUnitById(formData.unitId) : undefined;
 
-  // Auto-fill rent amount when property is selected
+  // Check if property needs unit selection
+  const propertyNeedsUnit = selectedProperty && isMultiUnitProperty(selectedProperty);
+
+  // Get available units for the selected property
+  const availableUnits: Unit[] = propertyNeedsUnit && selectedProperty?.units
+    ? selectedProperty.units.filter((u) => u.status === 'vacant' || u.status === 'reserved')
+    : [];
+
+  // Auto-fill rent amount when property or unit is selected
   useEffect(() => {
-    if (selectedProperty) {
+    if (selectedUnit) {
+      // Use unit's rent for multi-unit properties
       setFormData((prev) => ({
         ...prev,
-        rentAmount: selectedProperty.monthlyRent,
-        securityDeposit: selectedProperty.securityDeposit,
+        rentAmount: selectedUnit.monthlyRent,
+        securityDeposit: selectedUnit.securityDeposit ?? 0,
+      }));
+    } else if (selectedProperty && !propertyNeedsUnit) {
+      // Use property's rent for single-unit properties
+      setFormData((prev) => ({
+        ...prev,
+        rentAmount: getPropertyTotalRent(selectedProperty),
+        securityDeposit: selectedProperty.securityDeposit ?? 0,
       }));
     }
-  }, [selectedProperty]);
+  }, [selectedProperty, selectedUnit, propertyNeedsUnit]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -115,7 +144,9 @@ export default function AddTenantPage() {
   };
 
   const canProceedToStep2 = formData.ownerId !== '';
-  const canProceedToStep3 = formData.propertyId !== '';
+  // For multi-unit properties, require unit selection; for single-unit, just property
+  const canProceedToStep3 = formData.propertyId !== '' &&
+    (!propertyNeedsUnit || formData.unitId !== '');
   const canSubmit =
     formData.firstName.trim() !== '' &&
     formData.lastName.trim() !== '' &&
@@ -283,111 +314,221 @@ export default function AddTenantPage() {
           </div>
         )}
 
-        {/* Step 2: Select Property */}
+        {/* Step 2: Select Property & Unit */}
         {currentStep === 2 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Select Property</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {propertyNeedsUnit && formData.propertyId ? 'Select Unit' : 'Select Property'}
+                </h2>
                 <p className="text-gray-600">
-                  Choose from {selectedOwner?.firstName} {selectedOwner?.lastName}&apos;s properties.
+                  {propertyNeedsUnit && formData.propertyId
+                    ? `Choose a unit from ${selectedProperty?.name}`
+                    : `Choose from ${selectedOwner?.firstName} ${selectedOwner?.lastName}'s properties.`}
                 </p>
               </div>
               <button
-                onClick={() => setCurrentStep(1)}
+                onClick={() => {
+                  if (propertyNeedsUnit && formData.propertyId) {
+                    // Go back to property selection
+                    setFormData((prev) => ({ ...prev, propertyId: '', unitId: '' }));
+                  } else {
+                    setCurrentStep(1);
+                  }
+                }}
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
-                Change owner
+                {propertyNeedsUnit && formData.propertyId ? 'Change property' : 'Change owner'}
               </button>
             </div>
 
-            {/* Search Input for Properties */}
-            {ownerProperties.length > 0 && (
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={propertySearch}
-                  onChange={(e) => setPropertySearch(e.target.value)}
-                  placeholder="Search by property name, address, or city..."
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
-                />
-              </div>
-            )}
-
-            {filteredProperties.length === 0 && propertySearch ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600">No properties found matching &quot;{propertySearch}&quot;</p>
-                <button
-                  onClick={() => setPropertySearch('')}
-                  className="text-sm text-[#0B3D2C] hover:underline mt-2"
-                >
-                  Clear search
-                </button>
-              </div>
-            ) : availableProperties.length > 0 ? (
-              <div className="grid gap-4 max-h-96 overflow-y-auto">
-                {filteredProperties.map((property) => {
-                  const isSelected = formData.propertyId === property.id;
-                  const isAvailable = property.status === 'vacant' || property.status === 'under_review';
-
-                  return (
-                    <div
-                      key={property.id}
-                      onClick={() => isAvailable && setFormData((prev) => ({ ...prev, propertyId: property.id }))}
-                      className={`p-4 border-2 rounded-lg transition-all ${
-                        isAvailable
-                          ? isSelected
-                            ? 'border-[#0B3D2C] bg-green-50 cursor-pointer'
-                            : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                          : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-gray-100 rounded-lg">
-                            <Home className="w-6 h-6 text-gray-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{property.name}</p>
-                            <p className="text-sm text-gray-600">
-                              {property.address}, {property.city}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {property.bedrooms} bed, {property.bathrooms} bath, {property.area} sqft
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              property.status === 'vacant'
-                                ? 'bg-green-100 text-green-700'
-                                : property.status === 'under_review'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-gray-100 text-gray-700'
-                            }`}
-                          >
-                            {property.status === 'vacant' ? 'Available' : property.status === 'under_review' ? 'Under Review' : 'Occupied'}
-                          </span>
-                          <p className="text-lg font-semibold text-gray-900 mt-2">
-                            {formatCurrency(property.monthlyRent)}/mo
-                          </p>
-                        </div>
-                      </div>
+            {/* Unit Selection (for multi-unit properties) */}
+            {propertyNeedsUnit && formData.propertyId ? (
+              <div className="space-y-4">
+                {/* Selected Property Summary */}
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="font-medium text-gray-900">{selectedProperty?.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {selectedProperty?.address}, {selectedProperty?.city}
+                      </p>
                     </div>
-                  );
-                })}
+                  </div>
+                </div>
+
+                {availableUnits.length > 0 ? (
+                  <div className="grid gap-4 max-h-80 overflow-y-auto">
+                    {availableUnits.map((unit) => {
+                      const isSelected = formData.unitId === unit.id;
+
+                      return (
+                        <div
+                          key={unit.id}
+                          onClick={() => setFormData((prev) => ({ ...prev, unitId: unit.id }))}
+                          className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            isSelected
+                              ? 'border-[#0B3D2C] bg-green-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 bg-gray-100 rounded-lg">
+                                <Home className="w-6 h-6 text-gray-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{unit.name}</p>
+                                {unit.floor && (
+                                  <p className="text-sm text-gray-500">Floor {unit.floor}</p>
+                                )}
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {unit.bedrooms} bed, {unit.bathrooms} bath, {unit.area} sqft
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                unit.status === 'vacant'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-purple-100 text-purple-700'
+                              }`}>
+                                {unit.status === 'vacant' ? 'Vacant' : 'Reserved'}
+                              </span>
+                              <p className="text-lg font-semibold text-gray-900 mt-2">
+                                {formatCurrency(unit.monthlyRent)}/mo
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <Home className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">No vacant units available in this property.</p>
+                    <p className="text-sm text-gray-500 mt-1">All units are currently occupied.</p>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600">This owner has no available properties.</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  All properties are currently occupied or you need to add properties first.
-                </p>
-              </div>
+              <>
+                {/* Search Input for Properties */}
+                {ownerProperties.length > 0 && (
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={propertySearch}
+                      onChange={(e) => setPropertySearch(e.target.value)}
+                      placeholder="Search by property name, address, or city..."
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                    />
+                  </div>
+                )}
+
+                {filteredProperties.length === 0 && propertySearch ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">No properties found matching &quot;{propertySearch}&quot;</p>
+                    <button
+                      onClick={() => setPropertySearch('')}
+                      className="text-sm text-[#0B3D2C] hover:underline mt-2"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                ) : availableProperties.length > 0 || filteredProperties.some((p) => isMultiUnitProperty(p)) ? (
+                  <div className="grid gap-4 max-h-96 overflow-y-auto">
+                    {filteredProperties.map((property) => {
+                      const isMultiUnit = isMultiUnitProperty(property);
+                      const hasVacantUnits = isMultiUnit && property.units?.some(
+                        (u) => u.status === 'vacant' || u.status === 'reserved'
+                      );
+                      const isAvailable = property.status === 'vacant' || property.status === 'under_review' || hasVacantUnits;
+                      const isSelected = formData.propertyId === property.id;
+
+                      return (
+                        <div
+                          key={property.id}
+                          onClick={() => isAvailable && setFormData((prev) => ({
+                            ...prev,
+                            propertyId: property.id,
+                            unitId: '', // Clear unit selection
+                          }))}
+                          className={`p-4 border-2 rounded-lg transition-all ${
+                            isAvailable
+                              ? isSelected
+                                ? 'border-[#0B3D2C] bg-green-50 cursor-pointer'
+                                : 'border-gray-200 hover:border-gray-300 cursor-pointer'
+                              : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 bg-gray-100 rounded-lg">
+                                {isMultiUnit ? (
+                                  <Building2 className="w-6 h-6 text-gray-600" />
+                                ) : (
+                                  <Home className="w-6 h-6 text-gray-600" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-gray-900">{property.name}</p>
+                                  {isMultiUnit && (
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                      {property.units?.length} units
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600">
+                                  {property.address}, {property.city}
+                                </p>
+                                {!isMultiUnit && (
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    {property.bedrooms} bed, {property.bathrooms} bath, {property.area} sqft
+                                  </p>
+                                )}
+                                {isMultiUnit && hasVacantUnits && (
+                                  <p className="text-sm text-green-600 mt-1">
+                                    {property.units?.filter((u) => u.status === 'vacant').length} vacant units
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  isAvailable
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                {isAvailable ? 'Available' : 'Occupied'}
+                              </span>
+                              <p className="text-lg font-semibold text-gray-900 mt-2">
+                                {formatCurrency(getPropertyTotalRent(property))}/mo
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">This owner has no available properties.</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      All properties are currently occupied or you need to add properties first.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -399,14 +540,18 @@ export default function AddTenantPage() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Tenant Details</h2>
                 <p className="text-gray-600">
-                  Adding tenant to: <strong>{selectedProperty?.name}</strong>
+                  Adding tenant to: <strong>
+                    {selectedUnit
+                      ? `${selectedProperty?.name} - ${selectedUnit.name}`
+                      : selectedProperty?.name}
+                  </strong>
                 </p>
               </div>
               <button
                 onClick={() => setCurrentStep(2)}
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
-                Change property
+                Change {selectedUnit ? 'unit' : 'property'}
               </button>
             </div>
 
@@ -646,7 +791,11 @@ export default function AddTenantPage() {
             {/* Description */}
             <p className="text-gray-600 text-center mb-6">
               <strong>{formData.firstName} {formData.lastName}</strong> has been added to{' '}
-              <strong>{selectedProperty?.name}</strong>.
+              <strong>
+                {selectedUnit
+                  ? `${selectedProperty?.name} - ${selectedUnit.name}`
+                  : selectedProperty?.name}
+              </strong>.
             </p>
 
             {/* Summary */}
@@ -657,6 +806,12 @@ export default function AddTenantPage() {
                   {selectedOwner?.firstName} {selectedOwner?.lastName}
                 </span>
               </div>
+              {selectedUnit && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Unit</span>
+                  <span className="font-medium text-gray-900">{selectedUnit.name}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-gray-600">Monthly Rent</span>
                 <span className="font-medium text-gray-900">{formatCurrency(formData.rentAmount)}</span>

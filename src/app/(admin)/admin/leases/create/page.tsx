@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Save, Search, Check, FileText, Calendar, DollarSign } from 'lucide-react';
-import { mockProperties, mockTenants, mockPropertyOwners } from '@/lib/data/adminMock';
+import { mockProperties, mockTenants, mockPropertyOwners, getPropertyTotalRent } from '@/lib/data/adminMock';
 
 type Step = 'property' | 'terms' | 'clauses' | 'review';
 
@@ -99,8 +99,8 @@ export default function CreateLeasePage() {
     setFormData((prev) => ({
       ...prev,
       propertyId,
-      monthlyRent: property?.monthlyRent.toString() || '',
-      securityDeposit: property?.securityDeposit.toString() || '',
+      monthlyRent: property ? getPropertyTotalRent(property).toString() : '',
+      securityDeposit: (property?.securityDeposit ?? 0).toString() || '',
     }));
   };
 
@@ -305,7 +305,7 @@ export default function CreateLeasePage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">{formatCurrency(property.monthlyRent)}/mo</p>
+                        <p className="font-bold text-gray-900">{formatCurrency(getPropertyTotalRent(property))}/mo</p>
                         {formData.propertyId === property.id && (
                           <Check className="w-5 h-5 text-green-600 ml-auto mt-2" />
                         )}

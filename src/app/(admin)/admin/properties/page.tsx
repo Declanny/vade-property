@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { mockProperties, mockPropertyOwners, mockTenants } from '@/lib/data/adminMock';
+import { mockProperties, mockPropertyOwners, mockTenants, getPropertyTotalRent } from '@/lib/data/adminMock';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import type { Property as PublicProperty } from '@/lib/types';
 import type { Property as AdminProperty } from '@/lib/types/admin';
@@ -69,7 +69,7 @@ export default function PropertiesPage() {
       zipCode: adminProp.zipCode,
       latitude: 6.5244, // Default Lagos coordinates
       longitude: 3.3792,
-      price: adminProp.monthlyRent,
+      price: getPropertyTotalRent(adminProp),
       currency: 'NGN',
       paymentPlans: ['1_month', '3_months', '6_months', '12_months'],
       bedrooms: adminProp.bedrooms,
@@ -140,7 +140,7 @@ export default function PropertiesPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <p className="text-sm font-medium text-gray-600">Total Value</p>
           <p className="text-xl font-bold text-blue-600 mt-2">
-            {formatCurrency(properties.reduce((sum, p) => sum + p.monthlyRent, 0))}
+            {formatCurrency(properties.reduce((sum, p) => sum + getPropertyTotalRent(p), 0))}
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import type {
   PropertyOwner,
   Property,
+  Unit,
   Tenant,
   Payment,
   Complaint,
@@ -11,6 +12,10 @@ import type {
   PropertyWithTenant,
   Notification,
   ActivityItem,
+  VacancyListing,
+  UnitStatus,
+  PropertyStatus,
+  ShortletBooking,
 } from '../types/admin';
 
 // Mock Property Owners
@@ -55,6 +60,7 @@ export const mockPropertyOwners: PropertyOwner[] = [
     status: 'pending',
     inviteToken: 'inv-xyz123',
     inviteSentAt: '2024-12-10T09:00:00Z',
+    inviteExpiresAt: '2025-12-31T23:59:59Z', // Valid until end of 2025 for testing
     createdAt: '2024-12-10T09:00:00Z',
     totalProperties: 0,
     totalTenants: 0,
@@ -62,52 +68,77 @@ export const mockPropertyOwners: PropertyOwner[] = [
   },
 ];
 
-// Mock Properties
+// Mock Properties - Now with multi-unit support
+// Property = Building, Units = Rentable spaces within the building
 export const mockProperties: Property[] = [
+  // Multi-unit property: Skyline Apartments (2 units)
   {
     id: 'prop-1',
     ownerId: 'owner-1',
-    name: 'Skyline Apartments - Unit 2A',
+    name: 'Skyline Apartments',
     address: '123 Ahmadu Bello Way',
     city: 'Lagos',
     state: 'Lagos',
     zipCode: '101001',
     type: 'apartment',
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 1200,
-    monthlyRent: 850000,
-    securityDeposit: 1700000,
-    utilityCharges: 50000,
-    description: 'Modern 3-bedroom apartment with ocean views',
+    description: 'Modern apartment complex with ocean views and premium amenities',
     amenities: ['Swimming Pool', '24/7 Security', 'Gym', 'Parking', 'Generator'],
     images: ['/properties/apt-1.jpg', '/properties/apt-2.jpg'],
-    status: 'occupied',
-    currentTenantId: 'tenant-1',
+    status: 'occupied', // Overall building status
+    totalUnits: 2,
+    units: [
+      {
+        id: 'unit-1',
+        propertyId: 'prop-1',
+        name: 'Unit 2A',
+        floor: 2,
+        bedrooms: 3,
+        bathrooms: 2,
+        area: 1200,
+        allowLongTerm: true,
+        allowShortlet: false,
+        monthlyRent: 850000,
+        securityDeposit: 1700000,
+        utilityCharges: 50000,
+        status: 'occupied',
+        currentTenantId: 'tenant-1',
+        createdAt: '2024-01-20T10:00:00Z',
+        updatedAt: '2024-03-15T14:30:00Z',
+      },
+      {
+        id: 'unit-2',
+        propertyId: 'prop-1',
+        name: 'Unit 2B',
+        floor: 2,
+        bedrooms: 2,
+        bathrooms: 2,
+        area: 950,
+        allowLongTerm: true,
+        allowShortlet: true, // This unit allows both long-term and shortlet
+        monthlyRent: 650000,
+        securityDeposit: 1300000,
+        shortletPricing: {
+          dailyRate: 35000,
+          weeklyRate: 210000,
+          minimumNights: 2,
+          maximumNights: 30,
+          cleaningFee: 15000,
+          cautionDeposit: 100000,
+        },
+        availability: {
+          blockedDates: [],
+          instantBook: true,
+        },
+        status: 'vacant',
+        availableFrom: '2024-12-01T00:00:00Z',
+        createdAt: '2024-01-20T10:00:00Z',
+        updatedAt: '2024-11-28T09:00:00Z',
+      },
+    ],
     createdAt: '2024-01-20T10:00:00Z',
     updatedAt: '2024-03-15T14:30:00Z',
   },
-  {
-    id: 'prop-2',
-    ownerId: 'owner-1',
-    name: 'Skyline Apartments - Unit 2B',
-    address: '123 Ahmadu Bello Way',
-    city: 'Lagos',
-    state: 'Lagos',
-    zipCode: '101001',
-    type: 'apartment',
-    bedrooms: 2,
-    bathrooms: 2,
-    area: 950,
-    monthlyRent: 650000,
-    securityDeposit: 1300000,
-    amenities: ['Swimming Pool', '24/7 Security', 'Gym', 'Parking'],
-    images: ['/properties/apt-3.jpg'],
-    status: 'vacant',
-    availableFrom: '2024-12-01T00:00:00Z',
-    createdAt: '2024-01-20T10:00:00Z',
-    updatedAt: '2024-11-28T09:00:00Z',
-  },
+  // Single-unit property: Lekki Gardens House (no units array)
   {
     id: 'prop-3',
     ownerId: 'owner-1',
@@ -130,6 +161,7 @@ export const mockProperties: Property[] = [
     createdAt: '2024-02-10T11:00:00Z',
     updatedAt: '2024-02-10T11:00:00Z',
   },
+  // Single-unit property: Victoria Island Duplex
   {
     id: 'prop-4',
     ownerId: 'owner-1',
@@ -150,6 +182,7 @@ export const mockProperties: Property[] = [
     createdAt: '2024-11-25T15:00:00Z',
     updatedAt: '2024-12-05T10:00:00Z',
   },
+  // Single-unit property: GRA Executive Flat
   {
     id: 'prop-5',
     ownerId: 'owner-2',
@@ -171,6 +204,7 @@ export const mockProperties: Property[] = [
     createdAt: '2024-02-25T12:00:00Z',
     updatedAt: '2024-02-25T12:00:00Z',
   },
+  // Single-unit property: Old GRA Bungalow
   {
     id: 'prop-6',
     ownerId: 'owner-2',
@@ -183,6 +217,8 @@ export const mockProperties: Property[] = [
     bedrooms: 4,
     bathrooms: 3,
     area: 1800,
+    allowLongTerm: true,
+    allowShortlet: false,
     monthlyRent: 750000,
     securityDeposit: 1500000,
     amenities: ['Garden', 'Parking', 'Security'],
@@ -191,6 +227,112 @@ export const mockProperties: Property[] = [
     currentTenantId: 'tenant-4',
     createdAt: '2024-03-10T09:00:00Z',
     updatedAt: '2024-03-10T09:00:00Z',
+  },
+  // Shortlet-only property: Ikoyi Luxury Shortlet
+  {
+    id: 'prop-7',
+    ownerId: 'owner-1',
+    name: 'Ikoyi Luxury Shortlet',
+    address: '15 Banana Island Road',
+    city: 'Lagos',
+    state: 'Lagos',
+    zipCode: '101001',
+    type: 'apartment',
+    bedrooms: 2,
+    bathrooms: 2,
+    area: 1000,
+    allowLongTerm: false,
+    allowShortlet: true, // Shortlet only
+    shortletPricing: {
+      dailyRate: 85000,
+      weeklyRate: 500000,
+      minimumNights: 1,
+      maximumNights: 90,
+      cleaningFee: 25000,
+      cautionDeposit: 200000,
+    },
+    availability: {
+      blockedDates: ['2024-12-24', '2024-12-25', '2024-12-31', '2025-01-01'],
+      instantBook: false, // Requires owner approval
+    },
+    amenities: ['Swimming Pool', 'Gym', '24/7 Security', 'Smart Home', 'Netflix', 'WiFi', 'Workspace'],
+    images: ['/properties/shortlet-1.jpg', '/properties/shortlet-2.jpg'],
+    status: 'vacant', // Available for booking
+    createdAt: '2024-06-15T10:00:00Z',
+    updatedAt: '2024-12-01T09:00:00Z',
+  },
+];
+
+// Mock Shortlet Bookings
+export const mockShortletBookings: ShortletBooking[] = [
+  {
+    id: 'booking-1',
+    unitId: 'unit-2', // Skyline Apartments Unit 2B
+    propertyId: 'prop-1',
+    ownerId: 'owner-1',
+    guestName: 'Funke Akindele',
+    guestEmail: 'funke.akindele@example.com',
+    guestPhone: '+234 802 111 2222',
+    checkIn: '2024-12-20',
+    checkOut: '2024-12-27',
+    nights: 7,
+    nightlyRate: 35000,
+    subtotal: 245000,
+    cleaningFee: 15000,
+    cautionDeposit: 100000,
+    totalAmount: 360000,
+    status: 'confirmed',
+    paymentStatus: 'completed',
+    paymentReference: 'PAY-SHORT-001',
+    specialRequests: 'Early check-in if possible',
+    createdAt: '2024-12-10T14:00:00Z',
+    updatedAt: '2024-12-10T15:30:00Z',
+  },
+  {
+    id: 'booking-2',
+    unitId: 'prop-7', // Ikoyi Luxury Shortlet (single-unit)
+    propertyId: 'prop-7',
+    ownerId: 'owner-1',
+    guestName: 'Chidi Mokeme',
+    guestEmail: 'chidi.m@example.com',
+    guestPhone: '+234 803 333 4444',
+    checkIn: '2024-12-15',
+    checkOut: '2024-12-18',
+    nights: 3,
+    nightlyRate: 85000,
+    subtotal: 255000,
+    cleaningFee: 25000,
+    cautionDeposit: 200000,
+    totalAmount: 480000,
+    status: 'checked_out',
+    paymentStatus: 'completed',
+    paymentReference: 'PAY-SHORT-002',
+    checkInNotes: 'Guest arrived at 3pm',
+    checkOutNotes: 'All good, caution deposit refunded',
+    createdAt: '2024-12-05T10:00:00Z',
+    updatedAt: '2024-12-18T12:00:00Z',
+  },
+  {
+    id: 'booking-3',
+    unitId: 'prop-7',
+    propertyId: 'prop-7',
+    ownerId: 'owner-1',
+    guestName: 'Toke Makinwa',
+    guestEmail: 'toke.m@example.com',
+    guestPhone: '+234 805 555 6666',
+    checkIn: '2025-01-05',
+    checkOut: '2025-01-12',
+    nights: 7,
+    nightlyRate: 85000,
+    subtotal: 595000,
+    cleaningFee: 25000,
+    cautionDeposit: 200000,
+    totalAmount: 820000,
+    status: 'pending', // Awaiting owner approval (not instant book)
+    paymentStatus: 'pending',
+    specialRequests: 'Celebrating birthday, any surprises appreciated!',
+    createdAt: '2024-12-18T09:00:00Z',
+    updatedAt: '2024-12-18T09:00:00Z',
   },
 ];
 
@@ -205,6 +347,7 @@ export const mockTenants: Tenant[] = [
     dateOfBirth: '1990-05-15',
     role: 'tenant',
     propertyId: 'prop-1',
+    unitId: 'unit-1', // Multi-unit property - specific unit assignment
     kycStatus: 'approved',
     leaseStatus: 'active',
     moveInDate: '2024-03-15T00:00:00Z',
@@ -316,6 +459,7 @@ export const mockPayments: Payment[] = [
     id: 'pay-1',
     tenantId: 'tenant-1',
     propertyId: 'prop-1',
+    unitId: 'unit-1', // Multi-unit property - specific unit
     ownerId: 'owner-1',
     amount: 850000,
     type: 'rent',
@@ -415,6 +559,7 @@ export const mockComplaints: Complaint[] = [
     id: 'comp-2',
     tenantId: 'tenant-1',
     propertyId: 'prop-1',
+    unitId: 'unit-1', // Multi-unit property - specific unit
     ownerId: 'owner-1',
     title: 'AC Making Strange Noise',
     description: 'The air conditioning unit has been making a loud grinding noise for the past week.',
@@ -476,6 +621,7 @@ export const mockLeaseAgreements: LeaseAgreement[] = [
     id: 'lease-1',
     tenantId: 'tenant-1',
     propertyId: 'prop-1',
+    unitId: 'unit-1', // Multi-unit property - specific unit
     ownerId: 'owner-1',
     startDate: '2024-03-15T00:00:00Z',
     endDate: '2025-03-14T00:00:00Z',
@@ -549,7 +695,19 @@ export function getOwnersWithProperties(): OwnerWithProperties[] {
     .map(owner => {
       const properties = mockProperties.filter(p => p.ownerId === owner.id);
       const propertiesWithTenants: PropertyWithTenant[] = properties.map(property => {
-        const tenant = mockTenants.find(t => t.id === property.currentTenantId);
+        // For multi-unit properties, get tenant from units
+        // For single-unit properties, get tenant from property.currentTenantId
+        let tenant: Tenant | undefined;
+        if (property.units && property.units.length > 0) {
+          // Multi-unit: find first tenant (for overview display)
+          const occupiedUnit = property.units.find(u => u.currentTenantId);
+          if (occupiedUnit) {
+            tenant = mockTenants.find(t => t.id === occupiedUnit.currentTenantId);
+          }
+        } else {
+          tenant = mockTenants.find(t => t.id === property.currentTenantId);
+        }
+
         const lease = mockLeaseAgreements.find(l => l.propertyId === property.id);
         const recentPayments = mockPayments.filter(p => p.propertyId === property.id).slice(0, 3);
         const activeComplaints = mockComplaints.filter(
@@ -565,9 +723,28 @@ export function getOwnersWithProperties(): OwnerWithProperties[] {
         };
       });
 
-      const occupiedProperties = properties.filter(p => p.status === 'occupied').length;
-      const vacantProperties = properties.filter(p => p.status === 'vacant').length;
-      const totalMonthlyRent = properties.reduce((sum, p) => sum + p.monthlyRent, 0);
+      // Calculate stats considering multi-unit properties
+      let totalUnits = 0;
+      let occupiedUnits = 0;
+      let vacantUnits = 0;
+      let totalMonthlyRent = 0;
+
+      properties.forEach(p => {
+        if (p.units && p.units.length > 0) {
+          // Multi-unit property
+          totalUnits += p.units.length;
+          occupiedUnits += p.units.filter(u => u.status === 'occupied').length;
+          vacantUnits += p.units.filter(u => u.status === 'vacant').length;
+          totalMonthlyRent += p.units.reduce((sum, u) => sum + u.monthlyRent, 0);
+        } else {
+          // Single-unit property
+          totalUnits += 1;
+          if (p.status === 'occupied') occupiedUnits += 1;
+          if (p.status === 'vacant') vacantUnits += 1;
+          totalMonthlyRent += p.monthlyRent || 0;
+        }
+      });
+
       const collectedThisMonth = mockPayments
         .filter(
           p =>
@@ -588,8 +765,8 @@ export function getOwnersWithProperties(): OwnerWithProperties[] {
         properties: propertiesWithTenants,
         stats: {
           totalProperties: properties.length,
-          occupiedProperties,
-          vacantProperties,
+          occupiedProperties: occupiedUnits, // Now counts occupied units
+          vacantProperties: vacantUnits, // Now counts vacant units
           totalMonthlyRent,
           collectedThisMonth,
           overdueAmount,
@@ -612,4 +789,157 @@ export function getActiveComplaints(): Complaint[] {
 // Get overdue payments
 export function getOverduePayments(): Payment[] {
   return mockPayments.filter(p => p.status === 'pending' && new Date(p.dueDate) < new Date());
+}
+
+// ==================== UNIT HELPER FUNCTIONS ====================
+
+// Check if a property is multi-unit (has units array)
+export function isMultiUnitProperty(property: Property): boolean {
+  return !!property.units && property.units.length > 0;
+}
+
+// Get unit by ID
+export function getUnitById(unitId: string): Unit | undefined {
+  for (const property of mockProperties) {
+    if (property.units) {
+      const unit = property.units.find(u => u.id === unitId);
+      if (unit) return unit;
+    }
+  }
+  return undefined;
+}
+
+// Get property by unit ID
+export function getPropertyByUnitId(unitId: string): Property | undefined {
+  return mockProperties.find(p => p.units?.some(u => u.id === unitId));
+}
+
+// Get occupancy stats for a property
+export function getPropertyOccupancy(property: Property): { total: number; occupied: number; vacant: number } {
+  if (!property.units || property.units.length === 0) {
+    // Single-unit property
+    return {
+      total: 1,
+      occupied: property.status === 'occupied' ? 1 : 0,
+      vacant: property.status !== 'occupied' ? 1 : 0,
+    };
+  }
+
+  // Multi-unit property
+  const occupied = property.units.filter(u => u.status === 'occupied').length;
+  return {
+    total: property.units.length,
+    occupied,
+    vacant: property.units.length - occupied,
+  };
+}
+
+// Get total monthly rent for a property (sum of all units or single-unit rent)
+export function getPropertyTotalRent(property: Property): number {
+  if (property.units && property.units.length > 0) {
+    return property.units.reduce((sum, u) => sum + u.monthlyRent, 0);
+  }
+  return property.monthlyRent || 0;
+}
+
+// Get all vacant units/properties as a flat list for vacancy listings
+export function getVacancyListings(): VacancyListing[] {
+  const listings: VacancyListing[] = [];
+
+  mockProperties.forEach(property => {
+    if (property.units && property.units.length > 0) {
+      // Multi-unit property: list each vacant unit
+      property.units
+        .filter(unit => unit.status === 'vacant' || unit.status === 'maintenance')
+        .forEach(unit => {
+          listings.push({
+            id: unit.id,
+            type: 'unit',
+            propertyId: property.id,
+            propertyName: property.name,
+            unitId: unit.id,
+            unitName: unit.name,
+            name: `${property.name} - ${unit.name}`,
+            address: property.address,
+            city: property.city,
+            state: property.state,
+            bedrooms: unit.bedrooms,
+            bathrooms: unit.bathrooms,
+            area: unit.area,
+            monthlyRent: unit.monthlyRent,
+            securityDeposit: unit.securityDeposit,
+            status: unit.status,
+            availableFrom: unit.availableFrom,
+            amenities: property.amenities,
+            images: unit.images || property.images,
+            ownerId: property.ownerId,
+          });
+        });
+    } else if (property.status === 'vacant' || property.status === 'under_review') {
+      // Single-unit property
+      listings.push({
+        id: property.id,
+        type: 'property',
+        propertyId: property.id,
+        propertyName: property.name,
+        name: property.name,
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        bedrooms: property.bedrooms || 0,
+        bathrooms: property.bathrooms || 0,
+        area: property.area || 0,
+        monthlyRent: property.monthlyRent || 0,
+        securityDeposit: property.securityDeposit || 0,
+        status: property.status,
+        availableFrom: property.availableFrom,
+        amenities: property.amenities,
+        images: property.images,
+        ownerId: property.ownerId,
+      });
+    }
+  });
+
+  return listings;
+}
+
+// Get tenant by unit ID (for multi-unit properties)
+export function getTenantByUnitId(unitId: string): Tenant | undefined {
+  return mockTenants.find(t => t.unitId === unitId);
+}
+
+// Get tenant by property ID (for single-unit properties)
+export function getTenantByPropertyId(propertyId: string): Tenant | undefined {
+  const property = mockProperties.find(p => p.id === propertyId);
+  if (!property) return undefined;
+
+  // For multi-unit properties, this returns undefined - use getTenantByUnitId instead
+  if (property.units && property.units.length > 0) {
+    return undefined;
+  }
+
+  return mockTenants.find(t => t.propertyId === propertyId && !t.unitId);
+}
+
+// Get all tenants for a property (includes tenants in all units)
+export function getTenantsForProperty(propertyId: string): Tenant[] {
+  const property = mockProperties.find(p => p.id === propertyId);
+  if (!property) return [];
+
+  if (property.units && property.units.length > 0) {
+    // Multi-unit: get tenants from all units
+    const unitIds = property.units.map(u => u.id);
+    return mockTenants.filter(t => t.propertyId === propertyId || unitIds.includes(t.unitId || ''));
+  }
+
+  // Single-unit: get tenant assigned to property
+  return mockTenants.filter(t => t.propertyId === propertyId);
+}
+
+// Get available units for a property (vacant units that can have tenants assigned)
+export function getAvailableUnitsForProperty(propertyId: string): Unit[] {
+  const property = mockProperties.find(p => p.id === propertyId);
+  if (!property || !property.units) return [];
+
+  return property.units.filter(u => u.status === 'vacant' || u.status === 'reserved');
 }

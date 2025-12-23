@@ -12,7 +12,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
-import { mockPayments, mockProperties, mockComplaints, mockTenants, mockPropertyOwners } from '@/lib/data/adminMock';
+import { mockPayments, mockProperties, mockComplaints, mockTenants, mockPropertyOwners, getPropertyTotalRent } from '@/lib/data/adminMock';
 
 type ReportType = 'revenue' | 'occupancy' | 'payments' | 'complaints';
 
@@ -137,7 +137,7 @@ export default function ReportsPage() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <p className="text-sm text-gray-600">Average Rent</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(mockProperties.reduce((sum, p) => sum + p.monthlyRent, 0) / mockProperties.length)}
+                {formatCurrency(mockProperties.reduce((sum, p) => sum + getPropertyTotalRent(p), 0) / mockProperties.length)}
               </p>
               <p className="text-sm text-gray-500 mt-2">Per property</p>
             </div>
@@ -174,7 +174,7 @@ export default function ReportsPage() {
             <div className="space-y-4">
               {mockPropertyOwners.filter((o) => o.status === 'active').map((owner) => {
                 const ownerProperties = mockProperties.filter((p) => p.ownerId === owner.id);
-                const ownerRevenue = ownerProperties.reduce((sum, p) => sum + p.monthlyRent, 0);
+                const ownerRevenue = ownerProperties.reduce((sum, p) => sum + getPropertyTotalRent(p), 0);
                 const percentage = ((ownerRevenue / totalRevenue) * 100).toFixed(1);
                 return (
                   <div key={owner.id}>
@@ -283,7 +283,7 @@ export default function ReportsPage() {
                           {property.status.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-medium text-gray-900">{formatCurrency(property.monthlyRent)}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{formatCurrency(getPropertyTotalRent(property))}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -32,9 +32,13 @@ import {
   mockComplaints,
   mockTenants,
   mockLeaseAgreements,
+  isMultiUnitProperty,
+  getPropertyOccupancy,
+  getPropertyTotalRent,
 } from '@/lib/data/adminMock';
+import type { Unit } from '@/lib/types/admin';
 
-type TabType = 'overview' | 'tenant' | 'payments' | 'complaints' | 'maintenance';
+type TabType = 'overview' | 'units' | 'tenant' | 'payments' | 'complaints' | 'maintenance';
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -44,7 +48,13 @@ export default function PropertyDetailPage() {
   // Find property and related data
   const property = mockProperties.find((p) => p.id === propertyId);
   const owner = property ? mockPropertyOwners.find((o) => o.id === property.ownerId) : null;
-  const tenant = property?.currentTenantId
+  const isMultiUnit = property ? isMultiUnitProperty(property) : false;
+  const occupancy = property ? getPropertyOccupancy(property) : { total: 0, occupied: 0, vacant: 0 };
+  const totalRent = property ? getPropertyTotalRent(property) : 0;
+
+  // For single-unit properties, get tenant from property.currentTenantId
+  // For multi-unit properties, tenant is handled per unit in the Units tab
+  const tenant = !isMultiUnit && property?.currentTenantId
     ? mockTenants.find((t) => t.id === property.currentTenantId)
     : null;
   const propertyPayments = mockPayments.filter((p) => p.propertyId === propertyId);
@@ -52,6 +62,27 @@ export default function PropertyDetailPage() {
   const lease = tenant
     ? mockLeaseAgreements.find((l) => l.tenantId === tenant.id && l.propertyId === propertyId)
     : null;
+
+  // Helper to get tenant for a unit
+  const getTenantForUnit = (unit: Unit) => {
+    return unit.currentTenantId ? mockTenants.find(t => t.id === unit.currentTenantId) : null;
+  };
+
+  // Helper to get unit status badge
+  const getUnitStatusBadge = (status: string) => {
+    const badges: Record<string, { bg: string; text: string; label: string }> = {
+      occupied: { bg: 'bg-green-100', text: 'text-green-700', label: 'Occupied' },
+      vacant: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Vacant' },
+      maintenance: { bg: 'bg-red-100', text: 'text-red-700', label: 'Maintenance' },
+      reserved: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Reserved' },
+    };
+    const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status };
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -131,9 +162,13 @@ export default function PropertyDetailPage() {
     );
   }
 
+  // Build tabs based on property type
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: Home },
-    { id: 'tenant' as TabType, label: 'Tenant', icon: Users },
+    // Only show Units tab for multi-unit properties
+    ...(isMultiUnit ? [{ id: 'units' as TabType, label: 'Units', icon: Building2, count: property?.units?.length || 0 }] : []),
+    // Only show Tenant tab for single-unit properties
+    ...(!isMultiUnit ? [{ id: 'tenant' as TabType, label: 'Tenant', icon: Users }] : []),
     { id: 'payments' as TabType, label: 'Payments', icon: CreditCard, count: propertyPayments.length },
     { id: 'complaints' as TabType, label: 'Complaints', icon: MessageSquare, count: propertyComplaints.filter(c => c.status !== 'resolved' && c.status !== 'closed').length },
     { id: 'maintenance' as TabType, label: 'Maintenance', icon: Wrench },
@@ -208,44 +243,86 @@ export default function PropertyDetailPage() {
               <DollarSign className="w-5 h-5" style={{ color: '#0B3D2C' }} />
             </div>
             <div>
-              <p className="text-xs text-gray-600">Monthly Rent</p>
-              <p className="text-lg font-bold" style={{ color: '#0B3D2C' }}>{formatCurrency(property.monthlyRent)}</p>
+              <p className="text-xs text-gray-600">{isMultiUnit ? 'Total Rent' : 'Monthly Rent'}</p>
+              <p className="text-lg font-bold" style={{ color: '#0B3D2C' }}>{formatCurrency(totalRent)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <DollarSign className="w-5 h-5 text-blue-600" />
+        {isMultiUnit ? (
+          // Multi-unit: show occupancy stats
+          <>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Building2 className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Total Units</p>
+                  <p className="text-lg font-bold text-blue-600">{occupancy.total}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Security Deposit</p>
-              <p className="text-lg font-bold text-blue-600">{formatCurrency(property.securityDeposit)}</p>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100">
+                  <Users className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Occupied</p>
+                  <p className="text-lg font-bold text-green-600">{occupancy.occupied}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100">
-              <Maximize className="w-5 h-5 text-gray-600" />
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-yellow-100">
+                  <Home className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Vacant</p>
+                  <p className="text-lg font-bold text-yellow-600">{occupancy.vacant}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Area</p>
-              <p className="text-lg font-bold text-gray-900">{property.area} sqft</p>
+          </>
+        ) : (
+          // Single-unit: show deposit, area, bedrooms
+          <>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <DollarSign className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Security Deposit</p>
+                  <p className="text-lg font-bold text-blue-600">{formatCurrency(property.securityDeposit || 0)}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100">
-              <Bed className="w-5 h-5 text-gray-600" />
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gray-100">
+                  <Maximize className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Area</p>
+                  <p className="text-lg font-bold text-gray-900">{property.area || 0} sqft</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-600">Bedrooms / Baths</p>
-              <p className="text-lg font-bold text-gray-900">{property.bedrooms} / {property.bathrooms}</p>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gray-100">
+                  <Bed className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">Bedrooms / Baths</p>
+                  <p className="text-lg font-bold text-gray-900">{property.bedrooms || 0} / {property.bathrooms || 0}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {/* Tabs */}
@@ -368,8 +445,86 @@ export default function PropertyDetailPage() {
             </div>
           )}
 
-          {/* Tenant Tab */}
-          {activeTab === 'tenant' && (
+          {/* Units Tab - Only for multi-unit properties */}
+          {activeTab === 'units' && isMultiUnit && property.units && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Units ({property.units.length})
+                </h3>
+                <button
+                  className="text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-colors flex items-center"
+                  style={{ backgroundColor: '#0B3D2C' }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Unit
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {property.units.map((unit) => {
+                  const unitTenant = getTenantForUnit(unit);
+                  return (
+                    <div key={unit.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-gray-900">{unit.name}</h4>
+                        {getUnitStatusBadge(unit.status)}
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-600 mb-3">
+                        <div className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Bed className="w-4 h-4" />
+                            {unit.bedrooms} bed
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Bath className="w-4 h-4" />
+                            {unit.bathrooms} bath
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Maximize className="w-4 h-4" />
+                            {unit.area} sqft
+                          </span>
+                        </div>
+                        {unit.floor && (
+                          <p className="text-gray-500">Floor {unit.floor}</p>
+                        )}
+                      </div>
+                      <p className="font-bold text-lg" style={{ color: '#0B3D2C' }}>
+                        {formatCurrency(unit.monthlyRent)}/mo
+                      </p>
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        {unitTenant ? (
+                          <div className="flex items-center justify-between">
+                            <Link
+                              href={`/admin/tenants/${unitTenant.id}`}
+                              className="text-sm font-medium hover:underline flex items-center gap-2"
+                              style={{ color: '#0B3D2C' }}
+                            >
+                              <Users className="w-4 h-4" />
+                              {unitTenant.firstName} {unitTenant.lastName}
+                            </Link>
+                            {getStatusBadge(unitTenant.rentStatus)}
+                          </div>
+                        ) : (
+                          <Link
+                            href={`/admin/tenants/add?propertyId=${property.id}&unitId=${unit.id}`}
+                            className="text-sm font-medium hover:underline flex items-center gap-2"
+                            style={{ color: '#0B3D2C' }}
+                          >
+                            <Plus className="w-4 h-4" />
+                            Assign Tenant
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Tenant Tab - Only for single-unit properties */}
+          {activeTab === 'tenant' && !isMultiUnit && (
             <div>
               {tenant ? (
                 <div className="space-y-6">
