@@ -190,6 +190,18 @@ export default function OwnerOnboardingPage() {
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
 
+  // Bulk unit creation state
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkCount, setBulkCount] = useState(2);
+  const [namePrefix, setNamePrefix] = useState('Unit');
+  const [startingNumber, setStartingNumber] = useState(1);
+  const [useSamePrice, setUseSamePrice] = useState(true);
+  const [bulkPricing, setBulkPricing] = useState<{
+    unitName: string;
+    monthlyRent: string;
+    securityDeposit: string;
+  }[]>([]);
+
   // Current property form data
   const [propertyFormData, setPropertyFormData] = useState<PropertyFormData>(getEmptyProperty());
 
@@ -530,6 +542,13 @@ export default function OwnerOnboardingPage() {
   const openAddUnitModal = () => {
     setEditingUnitId(null);
     setUnitFormData(getEmptyUnit());
+    // Reset bulk mode state
+    setBulkMode(false);
+    setBulkCount(2);
+    setNamePrefix('Unit');
+    setStartingNumber(1);
+    setUseSamePrice(true);
+    setBulkPricing([]);
     setShowUnitModal(true);
   };
 
@@ -559,6 +578,53 @@ export default function OwnerOnboardingPage() {
       ...prev,
       units: prev.units.filter(u => u.id !== unitId),
     }));
+  };
+
+  // Bulk unit helpers
+  const generateUnitNames = (count: number, prefix: string, start: number) => {
+    return Array.from({ length: count }, (_, i) => `${prefix} ${start + i}`);
+  };
+
+  const initBulkPricing = (count: number, prefix: string, start: number) => {
+    const names = generateUnitNames(count, prefix, start);
+    setBulkPricing(names.map(name => ({
+      unitName: name,
+      monthlyRent: unitFormData.monthlyRent || '',
+      securityDeposit: unitFormData.securityDeposit || '',
+    })));
+  };
+
+  const saveBulkUnits = () => {
+    const names = generateUnitNames(bulkCount, namePrefix || 'Unit', startingNumber);
+    const newUnits: UnitFormData[] = names.map((name, i) => ({
+      ...getEmptyUnit(),
+      id: `unit-${Date.now()}-${i}`,
+      name,
+      bedrooms: unitFormData.bedrooms,
+      bathrooms: unitFormData.bathrooms,
+      area: unitFormData.area,
+      allowLongTerm: unitFormData.allowLongTerm,
+      allowShortlet: unitFormData.allowShortlet,
+      monthlyRent: useSamePrice
+        ? unitFormData.monthlyRent
+        : bulkPricing[i]?.monthlyRent || unitFormData.monthlyRent,
+      securityDeposit: useSamePrice
+        ? unitFormData.securityDeposit
+        : bulkPricing[i]?.securityDeposit || unitFormData.securityDeposit,
+      shortletDailyRate: unitFormData.shortletDailyRate,
+      shortletMinNights: unitFormData.shortletMinNights,
+      shortletCleaningFee: unitFormData.shortletCleaningFee,
+      images: [],
+    }));
+
+    setPropertyFormData(prev => ({
+      ...prev,
+      units: [...prev.units, ...newUnits],
+    }));
+
+    // Reset and close
+    setBulkMode(false);
+    setShowUnitModal(false);
   };
 
   // ============================================================================
@@ -1728,7 +1794,7 @@ export default function OwnerOnboardingPage() {
           <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h4 className="text-lg font-semibold text-gray-900">
-                {editingUnitId ? 'Edit Unit' : 'Add Unit'}
+                {editingUnitId ? 'Edit Unit' : (bulkMode ? `Add ${bulkCount} Units` : 'Add Unit(s)')}
               </h4>
               <button
                 onClick={() => setShowUnitModal(false)}
@@ -1739,19 +1805,116 @@ export default function OwnerOnboardingPage() {
             </div>
 
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Unit Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={unitFormData.name}
-                  onChange={e => setUnitFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Unit 2A, Flat 3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
-                />
-              </div>
+              {/* Mode Toggle - Only show when adding, not editing */}
+              {!editingUnitId && (
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    onClick={() => setBulkMode(false)}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      !bulkMode
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Single Unit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setBulkMode(true);
+                      initBulkPricing(bulkCount, namePrefix, startingNumber);
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      bulkMode
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Multiple Units
+                  </button>
+                </div>
+              )}
 
+              {/* Single Unit Name - Only show in single mode or when editing */}
+              {(!bulkMode || editingUnitId) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Unit Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={unitFormData.name}
+                    onChange={e => setUnitFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Unit 2A, Flat 3"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                  />
+                </div>
+              )}
+
+              {/* Bulk Mode Configuration */}
+              {bulkMode && !editingUnitId && (
+                <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        How many?
+                      </label>
+                      <select
+                        value={bulkCount}
+                        onChange={e => {
+                          const count = parseInt(e.target.value);
+                          setBulkCount(count);
+                          initBulkPricing(count, namePrefix, startingNumber);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      >
+                        {Array.from({ length: 19 }, (_, i) => i + 2).map(n => (
+                          <option key={n} value={n}>{n} units</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Name prefix
+                      </label>
+                      <input
+                        type="text"
+                        value={namePrefix}
+                        onChange={e => {
+                          setNamePrefix(e.target.value);
+                          initBulkPricing(bulkCount, e.target.value, startingNumber);
+                        }}
+                        placeholder="Unit"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start #
+                      </label>
+                      <input
+                        type="number"
+                        value={startingNumber}
+                        onChange={e => {
+                          const start = parseInt(e.target.value) || 1;
+                          setStartingNumber(start);
+                          initBulkPricing(bulkCount, namePrefix, start);
+                        }}
+                        min="1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Preview: </span>
+                    <span className="text-gray-900">
+                      {generateUnitNames(Math.min(bulkCount, 4), namePrefix || 'Unit', startingNumber).join(', ')}
+                      {bulkCount > 4 && `, ... (${bulkCount} total)`}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Unit Specifications - Shared for all modes */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
@@ -1810,11 +1973,43 @@ export default function OwnerOnboardingPage() {
                 </div>
               </div>
 
-              {/* Long-term Pricing */}
-              {unitFormData.allowLongTerm && (
+              {/* Pricing Mode Toggle - Only in bulk mode with long-term */}
+              {bulkMode && !editingUnitId && unitFormData.allowLongTerm && (
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Pricing</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={useSamePrice}
+                        onChange={() => setUseSamePrice(true)}
+                        className="w-4 h-4 border-gray-300 text-[#0B3D2C] focus:ring-[#0B3D2C]"
+                      />
+                      <span className="text-sm text-gray-700">Same price for all units</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={!useSamePrice}
+                        onChange={() => {
+                          setUseSamePrice(false);
+                          initBulkPricing(bulkCount, namePrefix, startingNumber);
+                        }}
+                        className="w-4 h-4 border-gray-300 text-[#0B3D2C] focus:ring-[#0B3D2C]"
+                      />
+                      <span className="text-sm text-gray-700">Different prices per unit</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Long-term Pricing - Same price mode or single unit */}
+              {unitFormData.allowLongTerm && (useSamePrice || !bulkMode || editingUnitId) && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent (₦)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Monthly Rent (₦){bulkMode && !editingUnitId && ' - All Units'}
+                    </label>
                     <input
                       type="number"
                       value={unitFormData.monthlyRent}
@@ -1824,7 +2019,9 @@ export default function OwnerOnboardingPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₦)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Security Deposit (₦){bulkMode && !editingUnitId && ' - All Units'}
+                    </label>
                     <input
                       type="number"
                       value={unitFormData.securityDeposit}
@@ -1832,6 +2029,59 @@ export default function OwnerOnboardingPage() {
                       min="0"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
                     />
+                  </div>
+                </div>
+              )}
+
+              {/* Different Prices Per Unit Table */}
+              {bulkMode && !editingUnitId && unitFormData.allowLongTerm && !useSamePrice && (
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                    <p className="text-sm font-medium text-gray-700">Set price for each unit</p>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">Unit</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">Monthly Rent (₦)</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">Deposit (₦)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {bulkPricing.map((item, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-2 text-gray-900 font-medium">{item.unitName}</td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                value={item.monthlyRent}
+                                onChange={e => {
+                                  const newPricing = [...bulkPricing];
+                                  newPricing[index] = { ...newPricing[index], monthlyRent: e.target.value };
+                                  setBulkPricing(newPricing);
+                                }}
+                                min="0"
+                                className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-[#0B3D2C] focus:border-transparent"
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                value={item.securityDeposit}
+                                onChange={e => {
+                                  const newPricing = [...bulkPricing];
+                                  newPricing[index] = { ...newPricing[index], securityDeposit: e.target.value };
+                                  setBulkPricing(newPricing);
+                                }}
+                                min="0"
+                                className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-[#0B3D2C] focus:border-transparent"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
@@ -1880,12 +2130,16 @@ export default function OwnerOnboardingPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={saveUnit}
-                  disabled={!unitFormData.name || (!unitFormData.allowLongTerm && !unitFormData.allowShortlet)}
+                  onClick={bulkMode && !editingUnitId ? saveBulkUnits : saveUnit}
+                  disabled={
+                    bulkMode && !editingUnitId
+                      ? (!unitFormData.allowLongTerm && !unitFormData.allowShortlet)
+                      : (!unitFormData.name || (!unitFormData.allowLongTerm && !unitFormData.allowShortlet))
+                  }
                   className="flex-1 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors disabled:opacity-50"
                   style={{ backgroundColor: '#0B3D2C' }}
                 >
-                  {editingUnitId ? 'Update Unit' : 'Add Unit'}
+                  {editingUnitId ? 'Update Unit' : (bulkMode ? `Add ${bulkCount} Units` : 'Add Unit')}
                 </button>
               </div>
             </div>

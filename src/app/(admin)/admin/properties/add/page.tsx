@@ -81,6 +81,19 @@ export default function AddPropertyPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
+
+  // Bulk unit creation state
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkCount, setBulkCount] = useState(2);
+  const [namePrefix, setNamePrefix] = useState('Unit');
+  const [startingNumber, setStartingNumber] = useState(1);
+  const [useSamePrice, setUseSamePrice] = useState(true);
+  const [bulkPricing, setBulkPricing] = useState<{
+    unitName: string;
+    monthlyRent: string;
+    securityDeposit: string;
+  }[]>([]);
+
   const [unitFormData, setUnitFormData] = useState<UnitFormData>({
     id: '',
     name: '',
@@ -298,6 +311,13 @@ export default function AddPropertyPage() {
       shortletMinNights: '1',
       shortletCleaningFee: '',
     });
+    // Reset bulk mode state
+    setBulkMode(false);
+    setBulkCount(2);
+    setNamePrefix('Unit');
+    setStartingNumber(1);
+    setUseSamePrice(true);
+    setBulkPricing([]);
     setShowUnitModal(true);
   };
 
@@ -329,6 +349,54 @@ export default function AddPropertyPage() {
       ...prev,
       units: prev.units.filter((u) => u.id !== unitId),
     }));
+  };
+
+  // Bulk unit helpers
+  const generateUnitNames = (count: number, prefix: string, start: number) => {
+    return Array.from({ length: count }, (_, i) => `${prefix} ${start + i}`);
+  };
+
+  const initBulkPricing = (count: number, prefix: string, start: number) => {
+    const names = generateUnitNames(count, prefix, start);
+    setBulkPricing(names.map(name => ({
+      unitName: name,
+      monthlyRent: unitFormData.monthlyRent || '',
+      securityDeposit: unitFormData.securityDeposit || '',
+    })));
+  };
+
+  const saveBulkUnits = () => {
+    const names = generateUnitNames(bulkCount, namePrefix || 'Unit', startingNumber);
+    const newUnits: UnitFormData[] = names.map((name, i) => ({
+      id: `unit-${Date.now()}-${i}`,
+      name,
+      description: '',
+      floor: '',
+      bedrooms: unitFormData.bedrooms,
+      bathrooms: unitFormData.bathrooms,
+      area: unitFormData.area,
+      monthlyRent: useSamePrice
+        ? unitFormData.monthlyRent
+        : bulkPricing[i]?.monthlyRent || unitFormData.monthlyRent,
+      securityDeposit: useSamePrice
+        ? unitFormData.securityDeposit
+        : bulkPricing[i]?.securityDeposit || unitFormData.securityDeposit,
+      images: [],
+      allowLongTerm: unitFormData.allowLongTerm,
+      allowShortlet: unitFormData.allowShortlet,
+      shortletDailyRate: unitFormData.shortletDailyRate,
+      shortletMinNights: unitFormData.shortletMinNights,
+      shortletCleaningFee: unitFormData.shortletCleaningFee,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      units: [...prev.units, ...newUnits],
+    }));
+
+    // Reset and close
+    setBulkMode(false);
+    setShowUnitModal(false);
   };
 
   const canProceed = () => {
@@ -1448,39 +1516,135 @@ export default function AddPropertyPage() {
             </button>
 
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
-              {editingUnitId ? 'Edit Unit' : 'Add New Unit'}
+              {editingUnitId ? 'Edit Unit' : (bulkMode ? `Add ${bulkCount} Units` : 'Add Unit(s)')}
             </h3>
 
             <div className="space-y-4">
-              {/* Unit Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Unit Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={unitFormData.name}
-                  onChange={(e) => setUnitFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Unit 2A, Flat 3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
-                />
-              </div>
+              {/* Mode Toggle - Only show when adding, not editing */}
+              {!editingUnitId && (
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    onClick={() => setBulkMode(false)}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      !bulkMode
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Single Unit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setBulkMode(true);
+                      initBulkPricing(bulkCount, namePrefix, startingNumber);
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      bulkMode
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Multiple Units
+                  </button>
+                </div>
+              )}
 
-              {/* Unit Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Unit Description (for listing)
-                </label>
-                <textarea
-                  value={unitFormData.description}
-                  onChange={(e) => setUnitFormData((prev) => ({ ...prev, description: e.target.value }))}
-                  rows={2}
-                  placeholder="Describe this unit for potential tenants..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
-                />
-              </div>
+              {/* Single Unit Name & Description - Only show in single mode or when editing */}
+              {(!bulkMode || editingUnitId) && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Unit Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={unitFormData.name}
+                      onChange={(e) => setUnitFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., Unit 2A, Flat 3"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                    />
+                  </div>
 
-              {/* Specs Row */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Unit Description (for listing)
+                    </label>
+                    <textarea
+                      value={unitFormData.description}
+                      onChange={(e) => setUnitFormData((prev) => ({ ...prev, description: e.target.value }))}
+                      rows={2}
+                      placeholder="Describe this unit for potential tenants..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Bulk Mode Configuration */}
+              {bulkMode && !editingUnitId && (
+                <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        How many?
+                      </label>
+                      <select
+                        value={bulkCount}
+                        onChange={(e) => {
+                          const count = parseInt(e.target.value);
+                          setBulkCount(count);
+                          initBulkPricing(count, namePrefix, startingNumber);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      >
+                        {Array.from({ length: 19 }, (_, i) => i + 2).map((n) => (
+                          <option key={n} value={n}>{n} units</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Name prefix
+                      </label>
+                      <input
+                        type="text"
+                        value={namePrefix}
+                        onChange={(e) => {
+                          setNamePrefix(e.target.value);
+                          initBulkPricing(bulkCount, e.target.value, startingNumber);
+                        }}
+                        placeholder="Unit"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start #
+                      </label>
+                      <input
+                        type="number"
+                        value={startingNumber}
+                        onChange={(e) => {
+                          const start = parseInt(e.target.value) || 1;
+                          setStartingNumber(start);
+                          initBulkPricing(bulkCount, namePrefix, start);
+                        }}
+                        min="1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Preview: </span>
+                    <span className="text-gray-900">
+                      {generateUnitNames(Math.min(bulkCount, 4), namePrefix || 'Unit', startingNumber).join(', ')}
+                      {bulkCount > 4 && `, ... (${bulkCount} total)`}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Specs Row - Shared for all modes */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
@@ -1490,6 +1654,7 @@ export default function AddPropertyPage() {
                     onChange={(e) => setUnitFormData((prev) => ({ ...prev, floor: e.target.value }))}
                     placeholder="e.g., 2"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                    disabled={bulkMode && !editingUnitId}
                   />
                 </div>
 
@@ -1559,12 +1724,42 @@ export default function AddPropertyPage() {
                 </div>
               </div>
 
-              {/* Long-term Pricing */}
-              {unitFormData.allowLongTerm && (
+              {/* Pricing Mode Toggle - Only in bulk mode with long-term */}
+              {bulkMode && !editingUnitId && unitFormData.allowLongTerm && (
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Pricing</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={useSamePrice}
+                        onChange={() => setUseSamePrice(true)}
+                        className="w-4 h-4 border-gray-300 text-[#0B3D2C] focus:ring-[#0B3D2C]"
+                      />
+                      <span className="text-sm text-gray-700">Same price for all units</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={!useSamePrice}
+                        onChange={() => {
+                          setUseSamePrice(false);
+                          initBulkPricing(bulkCount, namePrefix, startingNumber);
+                        }}
+                        className="w-4 h-4 border-gray-300 text-[#0B3D2C] focus:ring-[#0B3D2C]"
+                      />
+                      <span className="text-sm text-gray-700">Different prices per unit</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Long-term Pricing - Same price mode or single unit */}
+              {unitFormData.allowLongTerm && (useSamePrice || !bulkMode || editingUnitId) && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Monthly Rent (₦) <span className="text-red-500">*</span>
+                      Monthly Rent (₦){bulkMode && !editingUnitId && ' - All Units'} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -1577,7 +1772,7 @@ export default function AddPropertyPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Security Deposit (₦) <span className="text-red-500">*</span>
+                      Security Deposit (₦){bulkMode && !editingUnitId && ' - All Units'} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -1587,6 +1782,59 @@ export default function AddPropertyPage() {
                       placeholder="e.g., 500000"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
                     />
+                  </div>
+                </div>
+              )}
+
+              {/* Different Prices Per Unit Table */}
+              {bulkMode && !editingUnitId && unitFormData.allowLongTerm && !useSamePrice && (
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                    <p className="text-sm font-medium text-gray-700">Set price for each unit</p>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">Unit</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">Monthly Rent (₦)</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-700">Deposit (₦)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {bulkPricing.map((item, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-2 text-gray-900 font-medium">{item.unitName}</td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                value={item.monthlyRent}
+                                onChange={(e) => {
+                                  const newPricing = [...bulkPricing];
+                                  newPricing[index] = { ...newPricing[index], monthlyRent: e.target.value };
+                                  setBulkPricing(newPricing);
+                                }}
+                                min="0"
+                                className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-[#0B3D2C] focus:border-transparent"
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                value={item.securityDeposit}
+                                onChange={(e) => {
+                                  const newPricing = [...bulkPricing];
+                                  newPricing[index] = { ...newPricing[index], securityDeposit: e.target.value };
+                                  setBulkPricing(newPricing);
+                                }}
+                                min="0"
+                                className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-[#0B3D2C] focus:border-transparent"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
@@ -1634,52 +1882,63 @@ export default function AddPropertyPage() {
                 </div>
               )}
 
-              {/* Unit Images */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Unit Interior Images
-                </label>
-                <p className="text-xs text-gray-500 mb-3">
-                  (Max. 5 images) Interior photos for the public listing
-                </p>
+              {/* Unit Images - Only for single unit or editing */}
+              {(!bulkMode || editingUnitId) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Unit Interior Images
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    (Max. 5 images) Interior photos for the public listing
+                  </p>
 
-                <div className="grid grid-cols-5 gap-3">
-                  {unitFormData.images.map((image) => (
-                    <div
-                      key={image.id}
-                      className="relative aspect-square rounded-lg border border-gray-200 overflow-hidden group"
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeUnitImage(image.id, true)}
-                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  <div className="grid grid-cols-5 gap-3">
+                    {unitFormData.images.map((image) => (
+                      <div
+                        key={image.id}
+                        className="relative aspect-square rounded-lg border border-gray-200 overflow-hidden group"
                       >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                        <img
+                          src={image.url}
+                          alt={image.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeUnitImage(image.id, true)}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
 
-                  {Array.from({ length: Math.max(0, 5 - unitFormData.images.length) }).map((_, index) => (
-                    <label
-                      key={`modal-upload-${index}`}
-                      className="aspect-square rounded-lg border border-dashed border-gray-300 hover:border-[#0B3D2C] cursor-pointer flex items-center justify-center transition-colors bg-gray-50 hover:bg-green-50"
-                    >
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/jpg"
-                        onChange={(e) => handleUnitImageUpload(e, true)}
-                        className="hidden"
-                      />
-                      <ImagePlus className="w-6 h-6 text-[#0B3D2C]" />
-                    </label>
-                  ))}
+                    {Array.from({ length: Math.max(0, 5 - unitFormData.images.length) }).map((_, index) => (
+                      <label
+                        key={`modal-upload-${index}`}
+                        className="aspect-square rounded-lg border border-dashed border-gray-300 hover:border-[#0B3D2C] cursor-pointer flex items-center justify-center transition-colors bg-gray-50 hover:bg-green-50"
+                      >
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg"
+                          onChange={(e) => handleUnitImageUpload(e, true)}
+                          className="hidden"
+                        />
+                        <ImagePlus className="w-6 h-6 text-[#0B3D2C]" />
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Bulk mode note about images */}
+              {bulkMode && !editingUnitId && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    You can add images to each unit individually after creating them.
+                  </p>
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button
@@ -1689,20 +1948,31 @@ export default function AddPropertyPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={saveUnit}
+                  onClick={bulkMode && !editingUnitId ? saveBulkUnits : saveUnit}
                   disabled={
-                    !unitFormData.name ||
-                    !unitFormData.bedrooms ||
-                    !unitFormData.bathrooms ||
-                    !unitFormData.area ||
-                    (!unitFormData.allowLongTerm && !unitFormData.allowShortlet) ||
-                    (unitFormData.allowLongTerm && (!unitFormData.monthlyRent || !unitFormData.securityDeposit)) ||
-                    (unitFormData.allowShortlet && !unitFormData.shortletDailyRate)
+                    bulkMode && !editingUnitId
+                      ? (
+                          !unitFormData.bedrooms ||
+                          !unitFormData.bathrooms ||
+                          !unitFormData.area ||
+                          (!unitFormData.allowLongTerm && !unitFormData.allowShortlet) ||
+                          (unitFormData.allowLongTerm && useSamePrice && (!unitFormData.monthlyRent || !unitFormData.securityDeposit)) ||
+                          (unitFormData.allowShortlet && !unitFormData.shortletDailyRate)
+                        )
+                      : (
+                          !unitFormData.name ||
+                          !unitFormData.bedrooms ||
+                          !unitFormData.bathrooms ||
+                          !unitFormData.area ||
+                          (!unitFormData.allowLongTerm && !unitFormData.allowShortlet) ||
+                          (unitFormData.allowLongTerm && (!unitFormData.monthlyRent || !unitFormData.securityDeposit)) ||
+                          (unitFormData.allowShortlet && !unitFormData.shortletDailyRate)
+                        )
                   }
                   className="flex-1 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors disabled:opacity-50"
                   style={{ backgroundColor: '#0B3D2C' }}
                 >
-                  {editingUnitId ? 'Update Unit' : 'Add Unit'}
+                  {editingUnitId ? 'Update Unit' : (bulkMode ? `Add ${bulkCount} Units` : 'Add Unit')}
                 </button>
               </div>
             </div>
