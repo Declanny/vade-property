@@ -31,6 +31,42 @@ export default function AdminShortletsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedBooking, setSelectedBooking] = useState<ShortletBooking | null>(null);
+  const [bookings, setBookings] = useState<ShortletBooking[]>(mockShortletBookings);
+
+  // Booking action handlers
+  const updateBookingStatus = (bookingId: string, newStatus: ShortletBookingStatus) => {
+    setBookings(prev => prev.map(b =>
+      b.id === bookingId ? { ...b, status: newStatus } : b
+    ));
+    // Update selected booking if it's the one being changed
+    if (selectedBooking?.id === bookingId) {
+      setSelectedBooking(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+  };
+
+  const handleConfirmBooking = () => {
+    if (selectedBooking) {
+      updateBookingStatus(selectedBooking.id, 'confirmed');
+    }
+  };
+
+  const handleDeclineBooking = () => {
+    if (selectedBooking) {
+      updateBookingStatus(selectedBooking.id, 'cancelled');
+    }
+  };
+
+  const handleCheckIn = () => {
+    if (selectedBooking) {
+      updateBookingStatus(selectedBooking.id, 'checked_in');
+    }
+  };
+
+  const handleCheckOut = () => {
+    if (selectedBooking) {
+      updateBookingStatus(selectedBooking.id, 'checked_out');
+    }
+  };
 
   // Get property/unit name
   const getLocationName = (booking: ShortletBooking) => {
@@ -51,7 +87,7 @@ export default function AdminShortletsPage() {
   };
 
   // Filter bookings
-  const filteredBookings = mockShortletBookings.filter((booking) => {
+  const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
       booking.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.guestEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,13 +100,13 @@ export default function AdminShortletsPage() {
 
   // Stats
   const stats = {
-    total: mockShortletBookings.length,
-    pending: mockShortletBookings.filter((b) => b.status === 'pending').length,
-    confirmed: mockShortletBookings.filter((b) => b.status === 'confirmed').length,
-    checkedIn: mockShortletBookings.filter((b) => b.status === 'checked_in').length,
-    checkedOut: mockShortletBookings.filter((b) => b.status === 'checked_out').length,
-    cancelled: mockShortletBookings.filter((b) => b.status === 'cancelled').length,
-    totalRevenue: mockShortletBookings
+    total: bookings.length,
+    pending: bookings.filter((b) => b.status === 'pending').length,
+    confirmed: bookings.filter((b) => b.status === 'confirmed').length,
+    checkedIn: bookings.filter((b) => b.status === 'checked_in').length,
+    checkedOut: bookings.filter((b) => b.status === 'checked_out').length,
+    cancelled: bookings.filter((b) => b.status === 'cancelled').length,
+    totalRevenue: bookings
       .filter((b) => b.paymentStatus === 'completed')
       .reduce((sum, b) => sum + b.totalAmount, 0),
   };
@@ -438,18 +474,23 @@ export default function AdminShortletsPage() {
                 {selectedBooking.status === 'pending' && (
                   <>
                     <button
+                      onClick={handleConfirmBooking}
                       className="flex-1 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors"
                       style={{ backgroundColor: '#0B3D2C' }}
                     >
                       Confirm Booking
                     </button>
-                    <button className="flex-1 px-4 py-2 rounded-lg font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
+                    <button
+                      onClick={handleDeclineBooking}
+                      className="flex-1 px-4 py-2 rounded-lg font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                    >
                       Decline
                     </button>
                   </>
                 )}
                 {selectedBooking.status === 'confirmed' && (
                   <button
+                    onClick={handleCheckIn}
                     className="flex-1 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors"
                     style={{ backgroundColor: '#0B3D2C' }}
                   >
@@ -458,6 +499,7 @@ export default function AdminShortletsPage() {
                 )}
                 {selectedBooking.status === 'checked_in' && (
                   <button
+                    onClick={handleCheckOut}
                     className="flex-1 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors bg-gray-700"
                   >
                     Check-out Guest
