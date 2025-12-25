@@ -22,6 +22,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { mockPropertyOwners } from '@/lib/data/adminMock';
+import { StatusBadge } from '@/lib/utils/statusBadges';
 
 const PROPERTY_TYPES = ['apartment', 'house', 'duplex', 'commercial', 'studio', 'penthouse'];
 const COMMON_AMENITIES = [
@@ -81,6 +82,18 @@ export default function AddPropertyPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
+
+  // New owner creation state
+  const [showNewOwnerModal, setShowNewOwnerModal] = useState(false);
+  const [newOwnerData, setNewOwnerData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    bankName: '',
+    accountNumber: '',
+    accountName: '',
+  });
 
   // Bulk unit creation state
   const [bulkMode, setBulkMode] = useState(false);
@@ -155,9 +168,12 @@ export default function AddPropertyPage() {
   const steps = getSteps();
   const stepOrder: Step[] = ['owner', 'type', 'building', 'units', 'amenities', 'review'];
 
-  const activeOwners = mockPropertyOwners.filter((o) => o.status === 'active');
+  // Include both active and pending owners (admin can add properties for pending owners)
+  const availableOwners = mockPropertyOwners.filter(
+    (o) => o.status === 'active' || o.status === 'pending'
+  );
 
-  const filteredOwners = activeOwners.filter((owner) => {
+  const filteredOwners = availableOwners.filter((owner) => {
     if (!ownerSearch.trim()) return true;
     const searchLower = ownerSearch.toLowerCase();
     return (
@@ -466,6 +482,50 @@ export default function AddPropertyPage() {
     return parseInt(formData.monthlyRent || '0');
   };
 
+  // Handle creating new owner
+  const handleCreateOwner = () => {
+    if (!newOwnerData.firstName || !newOwnerData.lastName || !newOwnerData.email || !newOwnerData.phone) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const newOwner = {
+      id: `owner-${Date.now()}`,
+      firstName: newOwnerData.firstName,
+      lastName: newOwnerData.lastName,
+      email: newOwnerData.email,
+      phone: newOwnerData.phone,
+      role: 'property_owner' as const,
+      status: 'active' as const,
+      createdAt: new Date().toISOString(),
+      propertiesCount: 0,
+      totalProperties: 0,
+      totalTenants: 0,
+      monthlyRevenue: 0,
+      bankDetails: newOwnerData.bankName ? {
+        bankName: newOwnerData.bankName,
+        accountNumber: newOwnerData.accountNumber,
+        accountName: newOwnerData.accountName,
+      } : undefined,
+    };
+
+    // Add to mock data (in production, this would be an API call)
+    mockPropertyOwners.push(newOwner);
+
+    // Select the new owner and close modal
+    setFormData((prev) => ({ ...prev, ownerId: newOwner.id }));
+    setShowNewOwnerModal(false);
+    setNewOwnerData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      bankName: '',
+      accountNumber: '',
+      accountName: '',
+    });
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -621,6 +681,22 @@ export default function AddPropertyPage() {
 
             {/* Owner List */}
             <div className="space-y-2 max-h-96 overflow-y-auto">
+              {/* Create New Owner Card */}
+              <button
+                onClick={() => setShowNewOwnerModal(true)}
+                className="w-full text-left p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#0B3D2C] hover:bg-green-50 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">Create New Owner</p>
+                    <p className="text-sm text-gray-500">Add a new property owner to the system</p>
+                  </div>
+                </div>
+              </button>
+
               {filteredOwners.map((owner) => (
                 <button
                   key={owner.id}
@@ -639,9 +715,12 @@ export default function AddPropertyPage() {
                       {owner.firstName[0]}{owner.lastName[0]}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">
-                        {owner.firstName} {owner.lastName}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-gray-900">
+                          {owner.firstName} {owner.lastName}
+                        </p>
+                        <StatusBadge status={owner.status} />
+                      </div>
                       <p className="text-sm text-gray-500">{owner.email}</p>
                     </div>
                     <div className="text-sm text-gray-500">
@@ -1973,6 +2052,140 @@ export default function AddPropertyPage() {
                   style={{ backgroundColor: '#0B3D2C' }}
                 >
                   {editingUnitId ? 'Update Unit' : (bulkMode ? `Add ${bulkCount} Units` : 'Add Unit')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Owner Modal */}
+      {showNewOwnerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto py-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowNewOwnerModal(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
+            {/* Header */}
+            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-gray-900">Create New Owner</h4>
+              <button
+                onClick={() => setShowNewOwnerModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newOwnerData.firstName}
+                    onChange={(e) => setNewOwnerData((prev) => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="John"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newOwnerData.lastName}
+                    onChange={(e) => setNewOwnerData((prev) => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Doe"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Fields */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={newOwnerData.email}
+                  onChange={(e) => setNewOwnerData((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="john@example.com"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={newOwnerData.phone}
+                  onChange={(e) => setNewOwnerData((prev) => ({ ...prev, phone: e.target.value }))}
+                  placeholder="+234 800 000 0000"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                />
+              </div>
+
+              {/* Bank Details (Optional) */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <h5 className="text-sm font-medium text-gray-700 mb-3">Bank Details (Optional)</h5>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Bank Name</label>
+                    <input
+                      type="text"
+                      value={newOwnerData.bankName}
+                      onChange={(e) => setNewOwnerData((prev) => ({ ...prev, bankName: e.target.value }))}
+                      placeholder="Select or enter bank"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Account Number</label>
+                      <input
+                        type="text"
+                        value={newOwnerData.accountNumber}
+                        onChange={(e) => setNewOwnerData((prev) => ({ ...prev, accountNumber: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                        placeholder="0000000000"
+                        maxLength={10}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Account Name</label>
+                      <input
+                        type="text"
+                        value={newOwnerData.accountName}
+                        onChange={(e) => setNewOwnerData((prev) => ({ ...prev, accountName: e.target.value }))}
+                        placeholder="Account holder name"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowNewOwnerModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateOwner}
+                  disabled={!newOwnerData.firstName || !newOwnerData.lastName || !newOwnerData.email || !newOwnerData.phone}
+                  className="flex-1 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: '#0B3D2C' }}
+                >
+                  Create Owner
                 </button>
               </div>
             </div>
