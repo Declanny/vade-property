@@ -40,42 +40,14 @@ import {
   getPropertyTotalRent,
 } from '@/lib/data/adminMock';
 import type { Unit } from '@/lib/types/admin';
+import { formatCurrency, formatDate, formatDateShort } from '@/lib/utils/format';
+import { StatusBadge, PriorityBadge, TypeBadge } from '@/lib/utils/statusBadges';
+import { ConfirmDialog } from '@/components/admin';
+import { UnitModal } from '@/components/admin/UnitModal';
+import type { UnitFormData } from '@/lib/types/forms';
+import { getEmptyUnitForm } from '@/lib/types/forms';
 
 type TabType = 'overview' | 'units' | 'tenant' | 'payments' | 'complaints' | 'maintenance';
-
-interface UnitFormData {
-  id: string;
-  name: string;
-  floor: string;
-  bedrooms: string;
-  bathrooms: string;
-  area: string;
-  monthlyRent: string;
-  securityDeposit: string;
-  allowLongTerm: boolean;
-  allowShortlet: boolean;
-  shortletDailyRate: string;
-  shortletMinNights: string;
-  shortletCleaningFee: string;
-  status: string;
-}
-
-const getEmptyUnitForm = (): UnitFormData => ({
-  id: `unit-${Date.now()}`,
-  name: '',
-  floor: '',
-  bedrooms: '1',
-  bathrooms: '1',
-  area: '',
-  monthlyRent: '',
-  securityDeposit: '',
-  allowLongTerm: true,
-  allowShortlet: false,
-  shortletDailyRate: '',
-  shortletMinNights: '1',
-  shortletCleaningFee: '',
-  status: 'vacant',
-});
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -134,78 +106,6 @@ export default function PropertyDetailPage() {
   // Helper to get tenant for a unit
   const getTenantForUnit = (unit: Unit) => {
     return unit.currentTenantId ? mockTenants.find(t => t.id === unit.currentTenantId) : null;
-  };
-
-  // Helper to get unit status badge
-  const getUnitStatusBadge = (status: string) => {
-    const badges: Record<string, { bg: string; text: string; label: string }> = {
-      occupied: { bg: 'bg-green-100', text: 'text-green-700', label: 'Occupied' },
-      vacant: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Vacant' },
-      maintenance: { bg: 'bg-red-100', text: 'text-red-700', label: 'Maintenance' },
-      reserved: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Reserved' },
-    };
-    const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status };
-    return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
-        {badge.label}
-      </span>
-    );
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { bg: string; text: string; label: string }> = {
-      active: { bg: 'bg-green-100', text: 'text-green-700', label: 'Active' },
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' },
-      inactive: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Inactive' },
-      occupied: { bg: 'bg-green-100', text: 'text-green-700', label: 'Occupied' },
-      vacant: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Vacant' },
-      under_review: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Under Review' },
-      maintenance: { bg: 'bg-red-100', text: 'text-red-700', label: 'Maintenance' },
-      completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Completed' },
-      open: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Open' },
-      in_progress: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'In Progress' },
-      resolved: { bg: 'bg-green-100', text: 'text-green-700', label: 'Resolved' },
-      closed: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Closed' },
-      current: { bg: 'bg-green-100', text: 'text-green-700', label: 'Current' },
-      overdue: { bg: 'bg-red-100', text: 'text-red-700', label: 'Overdue' },
-    };
-    const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status };
-    return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
-        {badge.label}
-      </span>
-    );
-  };
-
-  const getTypeBadge = (type: string) => {
-    return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 capitalize">
-        {type.replace('_', ' ')}
-      </span>
-    );
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const badges: Record<string, { bg: string; text: string }> = {
-      low: { bg: 'bg-gray-100', text: 'text-gray-700' },
-      medium: { bg: 'bg-blue-100', text: 'text-blue-700' },
-      high: { bg: 'bg-orange-100', text: 'text-orange-700' },
-      urgent: { bg: 'bg-red-100', text: 'text-red-700' },
-    };
-    const badge = badges[priority] || badges.low;
-    return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
-        {priority.charAt(0).toUpperCase() + priority.slice(1)}
-      </span>
-    );
   };
 
   // ============================================================================
@@ -387,8 +287,8 @@ export default function PropertyDetailPage() {
             <Building2 className="w-16 h-16 text-gray-400" />
           </div>
           <div className="absolute top-4 right-4 flex gap-2">
-            {getStatusBadge(property.status)}
-            {getTypeBadge(property.type)}
+            <StatusBadge status={property.status} />
+            <TypeBadge type={property.type} />
           </div>
         </div>
 
@@ -565,7 +465,7 @@ export default function PropertyDetailPage() {
                   </div>
                   <div className="border border-gray-200 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-1">Status</p>
-                    <div>{getStatusBadge(property.status)}</div>
+                    <div><StatusBadge status={property.status} /></div>
                   </div>
                   <div className="border border-gray-200 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-1">Listed Date</p>
@@ -664,7 +564,7 @@ export default function PropertyDetailPage() {
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold text-gray-900">{unit.name}</h4>
                         <div className="flex items-center gap-2">
-                          {getUnitStatusBadge(unit.status)}
+                          <StatusBadge status={unit.status} />
                           <button
                             onClick={() => openEditUnitModal(unit)}
                             className="p-1 text-gray-400 hover:text-[#0B3D2C] transition-colors"
@@ -714,7 +614,7 @@ export default function PropertyDetailPage() {
                               <Users className="w-4 h-4" />
                               {unitTenant.firstName} {unitTenant.lastName}
                             </Link>
-                            {getStatusBadge(unitTenant.rentStatus)}
+                            <StatusBadge status={unitTenant.rentStatus} />
                           </div>
                         ) : (
                           <Link
@@ -756,7 +656,7 @@ export default function PropertyDetailPage() {
                           >
                             {tenant.firstName} {tenant.lastName}
                           </Link>
-                          {getStatusBadge(tenant.rentStatus)}
+                          <StatusBadge status={tenant.rentStatus} />
                         </div>
                         <div className="space-y-1 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
@@ -802,7 +702,7 @@ export default function PropertyDetailPage() {
                           </div>
                           <div>
                             <p className="text-sm text-gray-600">Status</p>
-                            {getStatusBadge(lease.status)}
+                            <StatusBadge status={lease.status} />
                           </div>
                         </div>
                       </div>
@@ -882,7 +782,7 @@ export default function PropertyDetailPage() {
                             {formatCurrency(payment.amount)}
                           </td>
                           <td className="px-4 py-4">
-                            {getStatusBadge(payment.status)}
+                            <StatusBadge status={payment.status} />
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-600">
                             {new Date(payment.dueDate).toLocaleDateString('en-NG')}
@@ -916,8 +816,8 @@ export default function PropertyDetailPage() {
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium text-gray-900">{complaint.title}</h4>
                         <div className="flex gap-2">
-                          {getPriorityBadge(complaint.priority)}
-                          {getStatusBadge(complaint.status)}
+                          <PriorityBadge priority={complaint.priority} />
+                          <StatusBadge status={complaint.status} />
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-3">{complaint.description}</p>
@@ -974,8 +874,8 @@ export default function PropertyDetailPage() {
                           <p className="text-sm text-gray-600">{record.description}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {getPriorityBadge(record.priority)}
-                          {getStatusBadge(record.status)}
+                          <PriorityBadge priority={record.priority} />
+                          <StatusBadge status={record.status} />
                         </div>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">

@@ -26,6 +26,8 @@ import {
   mockPropertyOwners,
 } from '@/lib/data/adminMock';
 import { ShortletBooking, ShortletBookingStatus, PaymentStatus } from '@/lib/types/admin';
+import { formatCurrency, formatDateWithWeekday } from '@/lib/utils/format';
+import { StatusBadge, STATUS_CONFIGS } from '@/lib/utils/statusBadges';
 
 export default function AdminShortletsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -111,22 +113,6 @@ export default function AdminShortletsPage() {
       .reduce((sum, b) => sum + b.totalAmount, 0),
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-NG', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
 
   const getStatusBadge = (status: ShortletBookingStatus) => {
     const badges: Record<ShortletBookingStatus, { bg: string; text: string; icon: React.ElementType }> = {
@@ -306,8 +292,8 @@ export default function AdminShortletsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm">
-                        <p className="text-gray-900">{formatDate(booking.checkIn)}</p>
-                        <p className="text-gray-500">{formatDate(booking.checkOut)}</p>
+                        <p className="text-gray-900">{formatDateWithWeekday(booking.checkIn)}</p>
+                        <p className="text-gray-500">{formatDateWithWeekday(booking.checkOut)}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -414,11 +400,11 @@ export default function AdminShortletsPage() {
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Check-in</p>
-                    <p className="font-medium text-gray-900">{formatDate(selectedBooking.checkIn)}</p>
+                    <p className="font-medium text-gray-900">{formatDateWithWeekday(selectedBooking.checkIn)}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Check-out</p>
-                    <p className="font-medium text-gray-900">{formatDate(selectedBooking.checkOut)}</p>
+                    <p className="font-medium text-gray-900">{formatDateWithWeekday(selectedBooking.checkOut)}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Nights</p>
