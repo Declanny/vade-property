@@ -15,7 +15,7 @@ export default function Hero() {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-primary/30 rounded-b-[2rem]"></div>
       
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 z-10 h-full flex items-center">
+      <div className="relative max-w-[1760px] mx-auto px-6 sm:px-10 lg:px-20 z-10 h-full flex items-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

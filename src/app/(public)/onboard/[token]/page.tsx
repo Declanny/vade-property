@@ -7,7 +7,6 @@ import {
   User,
   Building2,
   CreditCard,
-  Users,
   FileCheck,
   Check,
   ArrowLeft,
@@ -27,7 +26,7 @@ import { mockPropertyOwners } from '@/lib/data/adminMock';
 // TYPES
 // ============================================================================
 
-type Step = 'personal' | 'bank' | 'properties' | 'tenants' | 'review';
+type Step = 'personal' | 'bank' | 'properties' | 'review';
 
 interface ImageData {
   id: string;
@@ -80,16 +79,6 @@ interface PropertyFormData {
   units: UnitFormData[];
   amenities: string[];
   images: ImageData[];
-  // Tenant assignment
-  existingTenantEmail?: string;
-}
-
-interface TenantInvite {
-  propertyId: string;
-  unitId?: string;
-  email: string;
-  propertyName: string;
-  unitName?: string;
 }
 
 // ============================================================================
@@ -178,7 +167,6 @@ export default function OwnerOnboardingPage() {
   });
 
   const [properties, setProperties] = useState<PropertyFormData[]>([]);
-  const [tenantInvites, setTenantInvites] = useState<TenantInvite[]>([]);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Property modal state
@@ -334,11 +322,10 @@ export default function OwnerOnboardingPage() {
     { id: 'personal', label: 'Profile', icon: User },
     { id: 'bank', label: 'Bank', icon: CreditCard },
     { id: 'properties', label: 'Properties', icon: Building2 },
-    { id: 'tenants', label: 'Tenants', icon: Users },
     { id: 'review', label: 'Review', icon: FileCheck },
   ];
 
-  const stepOrder: Step[] = ['personal', 'bank', 'properties', 'tenants', 'review'];
+  const stepOrder: Step[] = ['personal', 'bank', 'properties', 'review'];
 
   const canProceed = () => {
     switch (currentStep) {
@@ -347,8 +334,6 @@ export default function OwnerOnboardingPage() {
       case 'bank':
         return bankDetails.bankName && bankDetails.accountNumber && bankDetails.accountName;
       case 'properties':
-        return true; // Optional
-      case 'tenants':
         return true; // Optional
       case 'review':
         return termsAccepted;
@@ -360,24 +345,14 @@ export default function OwnerOnboardingPage() {
   const nextStep = () => {
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
-      // Skip tenants step if no properties added
-      if (currentStep === 'properties' && properties.length === 0) {
-        setCurrentStep('review');
-      } else {
-        setCurrentStep(stepOrder[currentIndex + 1]);
-      }
+      setCurrentStep(stepOrder[currentIndex + 1]);
     }
   };
 
   const prevStep = () => {
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
-      // Skip tenants step if no properties
-      if (currentStep === 'review' && properties.length === 0) {
-        setCurrentStep('properties');
-      } else {
-        setCurrentStep(stepOrder[currentIndex - 1]);
-      }
+      setCurrentStep(stepOrder[currentIndex - 1]);
     }
   };
 
@@ -531,8 +506,6 @@ export default function OwnerOnboardingPage() {
 
   const removeProperty = (propertyId: string) => {
     setProperties(prev => prev.filter(p => p.id !== propertyId));
-    // Also remove any tenant invites for this property
-    setTenantInvites(prev => prev.filter(t => t.propertyId !== propertyId));
   };
 
   // ============================================================================
@@ -628,30 +601,6 @@ export default function OwnerOnboardingPage() {
   };
 
   // ============================================================================
-  // TENANT INVITE MANAGEMENT
-  // ============================================================================
-
-  const updateTenantInvite = (propertyId: string, unitId: string | undefined, email: string, propertyName: string, unitName?: string) => {
-    const key = unitId || propertyId;
-    setTenantInvites(prev => {
-      const existing = prev.findIndex(t => (t.unitId || t.propertyId) === key);
-      if (email.trim() === '') {
-        // Remove if empty
-        if (existing >= 0) {
-          return prev.filter((_, i) => i !== existing);
-        }
-        return prev;
-      }
-      if (existing >= 0) {
-        // Update existing
-        return prev.map((t, i) => i === existing ? { ...t, email } : t);
-      }
-      // Add new
-      return [...prev, { propertyId, unitId, email, propertyName, unitName }];
-    });
-  };
-
-  // ============================================================================
   // FORM SUBMISSION
   // ============================================================================
 
@@ -666,7 +615,6 @@ export default function OwnerOnboardingPage() {
       personalInfo,
       bankDetails,
       properties,
-      tenantInvites,
     });
 
     // Redirect to success page
@@ -1099,77 +1047,7 @@ export default function OwnerOnboardingPage() {
             </div>
           )}
 
-          {/* Step 4: Tenant Invites */}
-          {currentStep === 'tenants' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Invite Existing Tenants</h3>
-                <p className="text-sm text-gray-600">
-                  Do any of your properties have existing tenants? Enter their email to invite them.
-                </p>
-              </div>
-
-              {properties.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600">No properties added. Skip this step.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {properties.map(property => (
-                    <div key={property.id}>
-                      {property.isMultiUnit ? (
-                        // Multi-unit: show each unit
-                        property.units.map(unit => (
-                          <div
-                            key={unit.id}
-                            className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-3"
-                          >
-                            <div className="flex items-center gap-3 mb-3">
-                              <Home className="w-5 h-5 text-gray-400" />
-                              <div>
-                                <p className="font-medium text-gray-900">{unit.name}</p>
-                                <p className="text-sm text-gray-500">{property.name}</p>
-                              </div>
-                            </div>
-                            <input
-                              type="email"
-                              placeholder="Tenant's email address (optional)"
-                              value={tenantInvites.find(t => t.unitId === unit.id)?.email || ''}
-                              onChange={e => updateTenantInvite(property.id, unit.id, e.target.value, property.name, unit.name)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
-                            />
-                          </div>
-                        ))
-                      ) : (
-                        // Single-unit property
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex items-center gap-3 mb-3">
-                            <Home className="w-5 h-5 text-gray-400" />
-                            <p className="font-medium text-gray-900">{property.name}</p>
-                          </div>
-                          <input
-                            type="email"
-                            placeholder="Tenant's email address (optional)"
-                            value={tenantInvites.find(t => t.propertyId === property.id && !t.unitId)?.email || ''}
-                            onChange={e => updateTenantInvite(property.id, undefined, e.target.value, property.name)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B3D2C] focus:border-transparent"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  Tenants will receive an email invitation to join TruVade and complete their profile.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Review */}
+          {/* Step 4: Review */}
           {currentStep === 'review' && (
             <div className="space-y-6">
               <div>
@@ -1243,26 +1121,6 @@ export default function OwnerOnboardingPage() {
                   </div>
                 )}
               </div>
-
-              {/* Tenant Invites Summary */}
-              {tenantInvites.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
-                    <Users className="w-4 h-4 mr-2" />
-                    Tenant Invitations ({tenantInvites.length})
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    {tenantInvites.map((invite, i) => (
-                      <div key={i}>
-                        <p className="text-gray-900">{invite.email}</p>
-                        <p className="text-gray-500 text-xs">
-                          {invite.unitName ? `${invite.propertyName} - ${invite.unitName}` : invite.propertyName}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Terms */}
               <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg cursor-pointer">

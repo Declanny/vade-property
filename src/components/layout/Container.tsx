@@ -1,13 +1,13 @@
 import React from "react";
 
 export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  size?: "sm" | "md" | "lg" | "xl" | "full";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
   (
     {
-      size = "xl",
+      size = "2xl",
       children,
       className = "",
       ...props
@@ -19,13 +19,14 @@ export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
       md: "max-w-5xl",
       lg: "max-w-6xl",
       xl: "max-w-7xl",
+      "2xl": "max-w-[1760px]", // Airbnb-style wide layout
       full: "max-w-full",
     };
 
     return (
       <div
         ref={ref}
-        className={`mx-auto px-4 sm:px-6 lg:px-8 ${sizeStyles[size]} ${className}`}
+        className={`mx-auto px-6 sm:px-10 lg:px-20 ${sizeStyles[size]} ${className}`}
         {...props}
       >
         {children}

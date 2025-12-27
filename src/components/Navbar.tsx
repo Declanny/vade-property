@@ -37,7 +37,7 @@ export default function Navbar() {
         isScrolled ? 'bg-primary backdrop-blur-sm rounded-b-[2rem]' : 'bg-primary/20 backdrop-blur-sm'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+      <div className="max-w-[1760px] mx-auto px-6 sm:px-10 lg:px-20">
         {/* Top Row - Header */}
         <div className={`flex justify-between items-center h-16 transition-all duration-300 ${
           isScrolled ? 'border-b border-primary-light/50' : 'border-b border-white/30'
