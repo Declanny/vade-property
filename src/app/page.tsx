@@ -6,17 +6,14 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{
-        backgroundImage: "url('/propertymain.avif')"
-      }}
-    >
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <Hero />
-      <FeaturedProperties />
-      <WhyChooseUs />
-      <Footer />
+      <div className="pt-20">
+        <Hero />
+        <FeaturedProperties />
+        <WhyChooseUs />
+        <Footer />
+      </div>
     </div>
   );
 }

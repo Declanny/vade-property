@@ -1,13 +1,12 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Globe, User } from "lucide-react";
 import Link from "next/link";
 import Logo from "@/components/ui/Logo";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -20,125 +19,80 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { name: "Home", href: "/" },
-    { name: "Properties", href: "/properties" },
-    { name: "About", href: "/about" },
-    { name: "FAQ", href: "/faq" },
-    { name: "Contact", href: "/contact" },
-  ];
-
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-primary backdrop-blur-sm rounded-b-[2rem]' : 'bg-primary/20 backdrop-blur-sm'
+        isScrolled 
+          ? 'bg-white shadow-md' 
+          : 'bg-white/95 backdrop-blur-md'
       }`}
     >
       <div className="max-w-[1760px] mx-auto px-6 sm:px-10 lg:px-20">
-        {/* Top Row - Header */}
-        <div className={`flex justify-between items-center h-16 transition-all duration-300 ${
-          isScrolled ? 'border-b border-primary-light/50' : 'border-b border-white/30'
-        }`}>
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/">
             <motion.div
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.02 }}
               className="cursor-pointer"
             >
-              <Logo variant="light" size="md" />
+              <Logo variant="dark" size="lg" />
             </motion.div>
           </Link>
 
-          {/* Right side buttons */}
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <span className="text-white/90 text-sm font-medium">NGN</span>
-              <div className="w-7 h-5 bg-white/90 rounded-md flex items-center justify-center shadow-sm">
-                <span className="text-primary text-xs font-bold">NG</span>
-              </div>
-            </div>
-
-            <button className="text-white/90 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-all duration-200">
-              <div className="w-6 h-6 rounded-full border border-white/40 flex items-center justify-center hover:border-white/60">
-                <span className="text-xs font-semibold">?</span>
-              </div>
-            </button>
-
-            <button className="text-white/90 hover:text-white text-sm font-medium px-3 py-2 hover:bg-white/10 rounded-lg transition-all duration-200">
-              List your property
-            </button>
-
-            <button className="text-primary bg-white hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md">
-              Register
-            </button>
-
-            <button className="text-white border border-white/40 hover:border-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200">
-              Sign in
-            </button>
-          </div>
-        </div>
-
-        {/* Bottom Row - Navigation Tabs */}
-        <div className="flex justify-center items-center h-14">
-          <div className="flex space-x-2">
-            {navItems.map((item, index) => (
-              <Link key={item.name} href={item.href}>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`flex items-center px-6 py-3 rounded-full font-medium text-white transition-all duration-300 cursor-pointer ${
-                    index === 0
-                      ? 'bg-white/25 border border-white/40 shadow-lg backdrop-blur-sm'
-                      : 'hover:bg-white/15 hover:border hover:border-white/20'
-                  }`}
-                >
-                  <span className="text-sm font-semibold tracking-wide">{item.name}</span>
-                </motion.div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex justify-center py-2">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(!isOpen)}
-            className="text-white hover:text-gray-200 p-2"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </motion.button>
-        </div>
-
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isOpen && (
+          {/* Center Search - Hidden on mobile, shown on larger screens */}
+          <Link href="/properties" className="hidden lg:block">
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden bg-primary-dark backdrop-blur-sm border-t border-primary-light"
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-4 px-6 py-3 border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navItems.map((item) => (
-                  <Link key={item.name} href={item.href} onClick={() => setIsOpen(false)}>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="block px-3 py-2 text-white hover:text-gray-200 transition-colors duration-200 cursor-pointer"
-                    >
-                      {item.name}
-                    </motion.div>
-                  </Link>
-                ))}
+              <span className="text-sm font-semibold text-gray-800">Anywhere</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-sm font-semibold text-gray-800">Any week</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-sm text-gray-600">Add guests</span>
+              <div className="bg-accent text-white p-2 rounded-full">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </Link>
+
+          {/* Right side menu */}
+          <div className="flex items-center gap-2">
+            {/* List Property - Hidden on mobile */}
+            <Link href="/properties" className="hidden md:block">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                className="text-sm font-semibold text-gray-800 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                List your property
+              </motion.button>
+            </Link>
+
+            {/* Globe Icon */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              className="p-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Globe className="w-5 h-5 text-gray-700" />
+            </motion.button>
+
+            {/* User Menu */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-3 px-3 py-2 border border-gray-300 rounded-full hover:shadow-md transition-all cursor-pointer"
+            >
+              <Menu className="w-4 h-4 text-gray-700" />
+              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </motion.nav>
   );

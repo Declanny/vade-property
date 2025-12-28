@@ -11,26 +11,7 @@ export default function FeaturedProperties() {
 
   return (
     <section id="properties" className="py-20 bg-white/80 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center px-4 py-2 bg-primary/10 rounded-full text-sm font-medium text-primary mb-4">
-            Featured Listings
-          </div>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-black mb-4">
-            Verified Properties for You
-          </h2>
-          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-            Browse our selection of lawyer-verified properties with flexible payment options
-          </p>
-        </motion.div>
-
+      <div className="max-w-[1760px] mx-auto px-6 sm:px-10 lg:px-20">
         {/* Properties Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-10">
           {featuredProperties.slice(0, 25).map((property, index) => (
