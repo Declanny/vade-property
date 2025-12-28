@@ -40,24 +40,33 @@ export const Header: React.FC = () => {
             </motion.div>
           </Link>
 
-          {/* Center Search - Hidden on mobile, shown on larger screens */}
-          <Link href="/properties" className="hidden lg:block">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center gap-4 px-6 py-3 border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
-            >
-              <span className="text-sm font-semibold text-gray-800">Anywhere</span>
-              <span className="text-gray-300">|</span>
-              <span className="text-sm font-semibold text-gray-800">Any week</span>
-              <span className="text-gray-300">|</span>
-              <span className="text-sm text-gray-600">Add guests</span>
-              <div className="text-white p-2 rounded-full" style={{ backgroundColor: '#B87333' }}>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </motion.div>
-          </Link>
+          {/* Center Navigation - Hidden on mobile */}
+          <div className="hidden lg:flex items-center gap-8">
+            <Link href="/properties">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
+              >
+                Browse Properties
+              </motion.span>
+            </Link>
+            <Link href="/about">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
+              >
+                About
+              </motion.span>
+            </Link>
+            <Link href="/contact">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
+              >
+                Contact
+              </motion.span>
+            </Link>
+          </div>
 
           {/* Right side menu */}
           <div className="flex items-center gap-2">
