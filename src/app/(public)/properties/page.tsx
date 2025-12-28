@@ -195,84 +195,51 @@ export default function PropertiesPage() {
   }, [showLocationSections]);
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
-      <Container>
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Browse Properties
-          </h1>
-          <p className="text-lg text-gray-600">
-            Find your perfect home from our collection of verified properties
-          </p>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-8">
+    <div className="bg-gray-50 min-h-screen">
+      {/* Sticky Filter Bar */}
+      <div className="sticky top-20 z-40 bg-white border-b border-gray-200 py-4 shadow-sm">
+        <Container>
           <PropertyFilters
             filters={filters}
             onFiltersChange={setFilters}
             onSearch={setSearchQuery}
           />
-        </div>
+        </Container>
+      </div>
 
+      <Container className="py-8">
         {/* Results Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 bg-white p-4 rounded-[var(--radius-button)] shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <Badge variant="primary" size="lg">
-              {filteredProperties.length} {filteredProperties.length === 1 ? "Property" : "Properties"}
-            </Badge>
-            {searchQuery && (
-              <span className="text-sm text-gray-600">
-                for &quot;{searchQuery}&quot;
-              </span>
-            )}
+            <h2 className="text-xl font-semibold text-gray-900">
+              {filteredProperties.length} {filteredProperties.length === 1 ? "property" : "properties"}
+              {searchQuery && <span className="text-gray-600 font-normal"> for "{searchQuery}"</span>}
+            </h2>
           </div>
 
           <div className="flex items-center gap-4 w-full sm:w-auto">
             {/* Map View Link */}
             <Link
               href="/properties/map"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white hover:opacity-90 transition-colors"
-              style={{ backgroundColor: '#0B3D2C' }}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 font-medium text-gray-700 hover:border-gray-900 transition-colors bg-white"
             >
               <MapIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Map View</span>
+              <span className="hidden sm:inline">Show map</span>
             </Link>
 
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-gray-600 hover:text-primary"
-                }`}
-                aria-label="Grid view"
-              >
-                <LayoutGrid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === "list"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-gray-600 hover:text-primary"
-                }`}
-                aria-label="List view"
-              >
-                <LayoutList className="w-5 h-5" />
-              </button>
-            </div>
-
             {/* Sort */}
-            <div className="w-full sm:w-48">
-              <Select
+            <div className="w-full sm:w-auto">
+              <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                options={sortOptions}
-              />
+                className="px-4 py-2 border border-gray-300 rounded-full bg-white text-sm font-medium hover:border-gray-900 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-900"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
