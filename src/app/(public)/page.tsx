@@ -129,7 +129,7 @@ export default function HomePage() {
 
       {/* Featured Properties Section */}
       <section className="py-16 bg-white">
-        <Container>
+        <div className="max-w-[1760px] mx-auto px-6 sm:px-10 lg:px-20">
           <div className="text-center mb-12">
             <Badge variant="primary" size="lg" className="mb-4">
               Featured Listings
@@ -163,12 +163,12 @@ export default function HomePage() {
               <p className="text-gray-600">No featured properties available at the moment.</p>
             </div>
           )}
-        </Container>
+        </div>
       </section>
 
       {/* Trust Section - Lawyer Verification */}
       <section className="py-20 bg-white">
-        <Container>
+        <Container size="2xl">
           <div className="text-center mb-12">
             <Badge variant="success" size="lg" icon={<Shield className="w-4 h-4" />} className="mb-4">
               Legal Verification
