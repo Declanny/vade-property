@@ -191,18 +191,6 @@ export const Footer: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Copyright */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          viewport={{ once: true }}
-          className="border-t border-white/10 pt-6 text-center"
-        >
-          <p className="text-white/50 text-sm">
-            © 2025 TruVade. All rights reserved. | Built with 💚 in Nigeria
-          </p>
-        </motion.div>
       </div>
     </footer>
   );
