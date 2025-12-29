@@ -1,24 +1,44 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
 import { Badge } from "@/components/ui/Badge";
 import { Select } from "@/components/ui/Select";
 import { mockProperties } from "@/lib/data/mock";
-import { PropertyFilters as IPropertyFilters } from "@/lib/types";
+import { PropertyFilters as IPropertyFilters, RentalMode } from "@/lib/types";
 import { LayoutGrid, LayoutList, MapIcon } from "lucide-react";
 import Link from "next/link";
 import LocationSection from "@/components/property/LocationSection";
 import { detectLocationFromAddress } from "@/lib/data/locations";
 
 export default function PropertiesPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [filters, setFilters] = useState<IPropertyFilters>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"price_asc" | "price_desc" | "rating" | "newest">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [rentalMode, setRentalMode] = useState<RentalMode>(
+    (searchParams.get("mode") as RentalMode) || "all"
+  );
+
+  // Handle rental mode change and update URL
+  const handleRentalModeChange = (mode: RentalMode) => {
+    setRentalMode(mode);
+    const params = new URLSearchParams(searchParams.toString());
+    if (mode === "all") {
+      params.delete("mode");
+    } else {
+      params.set("mode", mode);
+    }
+    const newUrl = params.toString() ? `/properties?${params.toString()}` : "/properties";
+    router.push(newUrl, { scroll: false });
+  };
 
   const handleFavorite = (propertyId: string) => {
     setFavorites((prev) => {
@@ -85,6 +105,13 @@ export default function PropertiesPage() {
       result = result.filter((property) => property.verified);
     }
 
+    // Apply rental mode filter
+    if (rentalMode === "shortlet") {
+      result = result.filter((property) => property.allowShortlet === true);
+    } else if (rentalMode === "long_term") {
+      result = result.filter((property) => property.allowLongTerm === true);
+    }
+
     // Apply sorting
     switch (sortBy) {
       case "price_asc":
@@ -102,7 +129,7 @@ export default function PropertiesPage() {
     }
 
     return result;
-  }, [filters, searchQuery, sortBy]);
+  }, [filters, searchQuery, sortBy, rentalMode]);
 
   const sortOptions = [
     { value: "newest", label: "Newest First" },
@@ -203,6 +230,8 @@ export default function PropertiesPage() {
             filters={filters}
             onFiltersChange={setFilters}
             onSearch={setSearchQuery}
+            rentalMode={rentalMode}
+            onRentalModeChange={handleRentalModeChange}
           />
         </Container>
       </div>

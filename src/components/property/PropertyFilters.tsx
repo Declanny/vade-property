@@ -3,19 +3,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, SlidersHorizontal, X, ChevronDown, Home, MapPin, DollarSign, Bed } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PropertyFilters as IPropertyFilters, PropertyType, PaymentPlan } from "@/lib/types";
+import { PropertyFilters as IPropertyFilters, PropertyType, PaymentPlan, RentalMode } from "@/lib/types";
 import { Button } from "../ui/Button";
+import { RentalModeToggle } from "../ui/RentalModeToggle";
 
 export interface PropertyFiltersProps {
   filters: IPropertyFilters;
   onFiltersChange: (filters: IPropertyFilters) => void;
   onSearch?: (query: string) => void;
+  rentalMode?: RentalMode;
+  onRentalModeChange?: (mode: RentalMode) => void;
 }
 
 export const PropertyFilters: React.FC<PropertyFiltersProps> = ({
   filters,
   onFiltersChange,
   onSearch,
+  rentalMode = "all",
+  onRentalModeChange,
 }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,6 +138,18 @@ export const PropertyFilters: React.FC<PropertyFiltersProps> = ({
       {/* Airbnb-Style Filter Bar */}
       <div className="bg-white border border-gray-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow">
         <div className="flex items-center gap-2">
+          {/* Rental Mode Toggle */}
+          {onRentalModeChange && (
+            <>
+              <RentalModeToggle
+                value={rentalMode}
+                onChange={onRentalModeChange}
+                size="sm"
+              />
+              <div className="h-8 w-px bg-gray-200" />
+            </>
+          )}
+
           {/* Location Filter */}
           <FilterButton label="Location" filterKey="location" icon={MapPin} />
           

@@ -68,7 +68,7 @@ export default function LocationPage({ params }: LocationPageProps) {
   // If location not found
   if (!locationMeta) {
     return (
-      <div className="min-h-screen bg-gray-50 py-20">
+      <div className="min-h-screen bg-gray-50 pt-24 py-20">
         <Container>
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Location Not Found</h1>
@@ -89,7 +89,7 @@ export default function LocationPage({ params }: LocationPageProps) {
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 pt-24">
       {/* Simple Header - Airbnb Style */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">

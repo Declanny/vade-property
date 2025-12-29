@@ -37,6 +37,16 @@ export interface Profile {
 // Property Types
 export type PropertyType = "apartment" | "house" | "condo" | "studio" | "penthouse" | "villa" | "duplex";
 
+// Rental Mode Types
+export type RentalMode = "all" | "shortlet" | "long_term";
+
+export interface ShortletPricing {
+  dailyRate: number;
+  weeklyRate?: number;
+  minimumNights: number;
+  cleaningFee?: number;
+}
+
 export type PropertyStatus = "draft" | "pending_verification" | "verified" | "rejected" | "active" | "inactive" | "rented" | "maintenance";
 
 export type PaymentPlan = "1_month" | "3_months" | "6_months" | "12_months";
@@ -81,6 +91,10 @@ export interface Property {
   availableFrom?: Date;
   createdAt: Date;
   updatedAt: Date;
+  // Rental mode fields
+  allowShortlet?: boolean;
+  allowLongTerm?: boolean;
+  shortletPricing?: ShortletPricing;
 }
 
 export interface PropertyDocument {
@@ -304,6 +318,7 @@ export interface PropertyFilters {
   paymentPlans?: PaymentPlan[];
   verifiedOnly?: boolean;
   amenities?: string[];
+  rentalMode?: RentalMode;
 }
 
 export interface SearchParams extends PropertyFilters {

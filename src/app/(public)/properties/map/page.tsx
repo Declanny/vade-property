@@ -110,7 +110,7 @@ export default function PropertiesMapPage() {
   }, []);
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 min-h-screen pt-24">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* 55/45 Split Layout */}
         <div className="flex flex-col lg:flex-row gap-6">

@@ -1,4 +1,4 @@
-import { Property, User, PaymentPlanOption, PaymentPlan } from "../types";
+import { Property, User, PaymentPlanOption, PaymentPlan, ShortletPricing } from "../types";
 
 // Payment Plan Options
 export const paymentPlanOptions: PaymentPlanOption[] = [
@@ -78,8 +78,8 @@ export const commonAmenities = [
   "Shopping Mall Nearby",
 ];
 
-// Mock Properties
-export const mockProperties: Property[] = [
+// Mock Properties (base data)
+const baseProperties: Property[] = [
   {
     id: "prop-1",
     ownerId: "owner-1",
@@ -1477,6 +1477,65 @@ export const mockProperties: Property[] = [
     updatedAt: new Date("2024-12-02"),
   },
 ];
+
+// Apply rental mode fields to properties based on type and characteristics
+const applyRentalModes = (properties: Property[]): Property[] => {
+  return properties.map((property) => {
+    // Determine rental mode based on property type and characteristics
+    let allowShortlet = false;
+    let allowLongTerm = true; // Default to long-term
+    let shortletPricing: ShortletPricing | undefined;
+
+    // Villas and luxury serviced apartments are primarily for shortlets
+    if (property.type === "villa") {
+      allowShortlet = true;
+      allowLongTerm = false;
+    }
+    // Studios and apartments in upscale areas can be both
+    else if (property.type === "studio" || property.type === "apartment") {
+      allowShortlet = true;
+      allowLongTerm = true;
+    }
+    // Penthouses - shortlet focused
+    else if (property.type === "penthouse") {
+      allowShortlet = true;
+      allowLongTerm = true;
+    }
+    // Houses and duplexes - long-term only
+    else if (property.type === "house" || property.type === "duplex" || property.type === "condo") {
+      allowShortlet = false;
+      allowLongTerm = true;
+    }
+
+    // Override for serviced apartments (check description)
+    if (property.description.toLowerCase().includes("serviced") ||
+        property.title.toLowerCase().includes("serviced")) {
+      allowShortlet = true;
+      allowLongTerm = false;
+    }
+
+    // Generate shortlet pricing if applicable
+    if (allowShortlet) {
+      const dailyRate = Math.round(property.price / 20); // Approximate daily rate
+      shortletPricing = {
+        dailyRate,
+        weeklyRate: Math.round(dailyRate * 6), // ~14% weekly discount
+        minimumNights: property.type === "villa" || property.price > 5000000 ? 3 : 1,
+        cleaningFee: Math.round(property.price * 0.02), // 2% of monthly as cleaning fee
+      };
+    }
+
+    return {
+      ...property,
+      allowShortlet,
+      allowLongTerm,
+      shortletPricing,
+    };
+  });
+};
+
+// Apply rental modes to all properties and export
+export const mockProperties = applyRentalModes(baseProperties);
 
 // Helper Functions
 export const getPropertyById = (id: string): Property | undefined => {

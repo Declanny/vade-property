@@ -1,15 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Shield, CheckCircle, Search, FileCheck, Key, TrendingUp, Users, Home as HomeIcon } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { RentalModeToggle } from "@/components/ui/RentalModeToggle";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { getFeaturedProperties, mockLawyers } from "@/lib/data/mock";
+import { RentalMode } from "@/lib/types";
 
 export default function HomePage() {
+  const [rentalMode, setRentalMode] = useState<RentalMode>("all");
   const featuredProperties = getFeaturedProperties();
 
   const stats = [
@@ -90,13 +94,22 @@ export default function HomePage() {
               <span className="text-accent block mt-2">Legal Protection</span>
             </h1>
 
-            <p className="text-xl text-gray-100 mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
               Secure, verified properties with flexible payment plans. Every listing is lawyer-verified for your peace of mind.
             </p>
 
+            {/* Rental Mode Toggle */}
+            <div className="flex justify-center mb-8">
+              <RentalModeToggle
+                value={rentalMode}
+                onChange={setRentalMode}
+                size="lg"
+              />
+            </div>
+
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/properties">
+              <Link href={`/properties${rentalMode !== "all" ? `?mode=${rentalMode}` : ""}`}>
                 <Button variant="accent" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
                   Browse Properties
                 </Button>
