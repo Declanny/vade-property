@@ -2,12 +2,32 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Menu, Globe, User } from "lucide-react";
 import Logo from "../ui/Logo";
+import { RentalModeToggle } from "../ui/RentalModeToggle";
+import type { RentalMode } from "@/lib/types";
 
 export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const isMapPage = pathname === "/properties/map";
+  const rentalMode = (searchParams.get("mode") as RentalMode) || "all";
+
+  const handleRentalModeChange = (mode: RentalMode) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (mode === "all") {
+      params.delete("mode");
+    } else {
+      params.set("mode", mode);
+    }
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    router.push(newUrl, { scroll: false });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,30 +62,40 @@ export const Header: React.FC = () => {
 
           {/* Center Navigation - Hidden on mobile */}
           <div className="hidden lg:flex items-center gap-8">
-            <Link href="/properties">
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
-              >
-                Browse Properties
-              </motion.span>
-            </Link>
-            <Link href="/about">
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
-              >
-                About
-              </motion.span>
-            </Link>
-            <Link href="/contact">
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
-              >
-                Contact
-              </motion.span>
-            </Link>
+            {isMapPage ? (
+              <RentalModeToggle
+                value={rentalMode}
+                onChange={handleRentalModeChange}
+                size="lg"
+              />
+            ) : (
+              <>
+                <Link href="/properties">
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
+                  >
+                    Browse Properties
+                  </motion.span>
+                </Link>
+                <Link href="/about">
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
+                  >
+                    About
+                  </motion.span>
+                </Link>
+                <Link href="/contact">
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    className="text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
+                  >
+                    Contact
+                  </motion.span>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Right side menu */}

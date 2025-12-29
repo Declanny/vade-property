@@ -90,24 +90,20 @@ export default function LocationPage({ params }: LocationPageProps) {
 
   return (
     <div className="bg-gray-50 pt-24">
-      {/* Simple Header - Airbnb Style */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-1">
-              Over {locationProperties.length} properties in {locationMeta.name}
-            </h1>
-            <p className="text-gray-600">{locationMeta.description}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content - 55/45 Split Layout like Map Page */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {locationProperties.length > 0 ? (
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Side - Scrollable Properties List (55%) */}
             <div className="w-full lg:w-[55%] space-y-6">
+              {/* Location Header */}
+              <div className="mb-2">
+                <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+                  Over {locationProperties.length} properties in {locationMeta.name}
+                </h1>
+                <p className="text-gray-600">{locationMeta.description}</p>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {locationProperties.map((property) => (
                   <PropertyCard

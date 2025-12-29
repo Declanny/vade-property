@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { mockProperties } from '@/lib/data/mock';
-import type { Property } from '@/lib/types';
+import type { Property, RentalMode } from '@/lib/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 // Dynamically import map component (no SSR)
@@ -59,6 +60,9 @@ function groupPropertiesByArea(properties: Property[]) {
 }
 
 export default function PropertiesMapPage() {
+  const searchParams = useSearchParams();
+  const rentalMode = (searchParams.get("mode") as RentalMode) || "all";
+
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>();
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
@@ -76,10 +80,18 @@ export default function PropertiesMapPage() {
     });
   }, []);
 
-  // All properties
+  // Filter properties by rental mode
   const filteredProperties = useMemo(() => {
-    return [...mockProperties];
-  }, []);
+    let result = [...mockProperties];
+
+    if (rentalMode === "shortlet") {
+      result = result.filter((property) => property.allowShortlet === true);
+    } else if (rentalMode === "long_term") {
+      result = result.filter((property) => property.allowLongTerm === true);
+    }
+
+    return result;
+  }, [rentalMode]);
 
   // Group filtered properties by area
   const propertiesByArea = useMemo(() => {
