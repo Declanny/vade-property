@@ -41,13 +41,13 @@ export default function LocationSection({
   if (properties.length === 0) return null;
 
   return (
-    <div className="mb-12">
+    <div className="mb-6 md:mb-12">
       {/* Section Header */}
-      <div className="flex items-end justify-between mb-4">
+      <div className="flex items-end justify-between mb-2 md:mb-4">
         <div className="flex-1">
           {locationSlug ? (
             <Link href={`/properties/${locationSlug}`} className="group">
-              <h2 className="text-2xl font-bold text-gray-900 group-hover:underline">
+              <h2 className="text-lg md:text-2xl font-bold text-gray-900 group-hover:underline">
                 {title}
               </h2>
               {description && (
@@ -56,7 +56,7 @@ export default function LocationSection({
             </Link>
           ) : (
             <>
-              <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+              <h2 className="text-lg md:text-2xl font-bold text-gray-900">{title}</h2>
               {description && (
                 <p className="text-gray-600 mt-1">{description}</p>
               )}
@@ -91,7 +91,7 @@ export default function LocationSection({
         {/* Property Cards - Horizontal Scroll */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+          className="flex gap-3 md:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -100,7 +100,7 @@ export default function LocationSection({
           {properties.map((property) => (
             <div
               key={property.id}
-              className="flex-none w-[calc(20%-1.2rem)] min-w-[240px]"
+              className="flex-none w-[42%] md:w-[calc(33%-1rem)] lg:w-[calc(25%-1.2rem)] xl:w-[calc(20%-1.2rem)]"
             >
               <PropertyCard
                 property={property}

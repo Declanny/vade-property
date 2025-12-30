@@ -58,7 +58,7 @@ export default function FeaturedProperties() {
 
   return (
     <section id="properties" className="py-12 bg-white/80 backdrop-blur-sm">
-      <div className="max-w-[1760px] mx-auto px-6 sm:px-10 lg:px-20">
+      <div className="max-w-[1760px] mx-auto pl-4 pr-0 sm:px-10 lg:px-20">
         {/* Popular in Ikoyi */}
         <LocationSection
           title="Popular in Ikoyi"
@@ -104,24 +104,15 @@ export default function FeaturedProperties() {
         />
 
         {/* View All CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="text-center mt-8"
-        >
-          <Link href="/properties">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-accent text-white rounded-[var(--radius-button)] font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-accent-light transition-all duration-300 inline-flex items-center gap-2"
-            >
-              View All Properties
-              <ArrowRight className="w-5 h-5" />
-            </motion.button>
+        <div className="text-center mt-4 md:mt-8 pl-0 md:pl-0">
+          <Link
+            href="/properties"
+            className="text-sm md:text-base font-semibold underline hover:no-underline transition-all"
+            style={{ color: '#0B3D2C' }}
+          >
+            Show all properties
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
