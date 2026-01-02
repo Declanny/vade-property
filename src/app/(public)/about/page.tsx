@@ -33,7 +33,7 @@ export default function AboutPage() {
   return (
     <div className="bg-white">
       {/* Hero - Clean without background */}
-      <section className="pt-16 pb-12">
+      <section className="pt-32 pb-12">
         <Container>
           <div className="max-w-3xl mx-auto text-center">
             <Badge variant="primary" size="lg" className="mb-6">

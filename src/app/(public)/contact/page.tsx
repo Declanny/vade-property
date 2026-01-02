@@ -68,7 +68,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-primary text-white py-16">
+      <div className="bg-primary text-white pt-32 pb-16">
         <Container>
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
