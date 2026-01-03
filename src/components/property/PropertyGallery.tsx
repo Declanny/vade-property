@@ -45,15 +45,15 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, alt })
 
   return (
     <>
-      {/* Main Gallery Grid */}
-      <div className="grid grid-cols-4 gap-2 rounded-[var(--radius-button)] overflow-hidden">
+      {/* Main Gallery Grid - Airbnb-style compact layout */}
+      <div className="grid grid-cols-4 gap-2 rounded-xl overflow-hidden h-[300px] md:h-[400px]">
         {/* Main Image - spans 2 columns and 2 rows */}
         <div
-          className="col-span-4 md:col-span-2 md:row-span-2 aspect-square md:aspect-auto cursor-pointer overflow-hidden group"
+          className="col-span-4 md:col-span-2 md:row-span-2 cursor-pointer overflow-hidden group"
           onClick={() => openLightbox(0)}
         >
           <div
-            className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 group-hover:scale-110 transition-transform duration-300"
+            className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 group-hover:scale-105 transition-transform duration-300"
             style={{
               backgroundImage: images[0] ? `url(${images[0]})` : undefined,
               backgroundSize: "cover",
@@ -68,11 +68,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, alt })
         {images.slice(1, 5).map((image, index) => (
           <div
             key={index}
-            className="col-span-2 md:col-span-1 aspect-square cursor-pointer overflow-hidden group relative"
+            className="hidden md:block col-span-1 cursor-pointer overflow-hidden group relative"
             onClick={() => openLightbox(index + 1)}
           >
             <div
-              className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 group-hover:scale-110 transition-transform duration-300"
+              className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 group-hover:scale-105 transition-transform duration-300"
               style={{
                 backgroundImage: image ? `url(${image})` : undefined,
                 backgroundSize: "cover",

@@ -55,7 +55,7 @@ export default function PropertyDetailPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-gray-50 min-h-screen pt-24 pb-8">
       <Container>
         {/* Back Button */}
         <Link href="/properties" className="inline-flex items-center gap-2 text-gray-600 hover:text-primary mb-6 transition-colors">
