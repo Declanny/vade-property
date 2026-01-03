@@ -107,13 +107,35 @@ export default function LocationPage({ params }: LocationPageProps) {
             <div className="w-full lg:w-[55%] space-y-6">
               {/* Location Header */}
               <div className="mb-2">
-                <h1 className="text-2xl font-semibold text-gray-900 mb-1">
-                  Over {locationProperties.length} properties in {locationMeta.name}
+                <h1 className="text-lg md:text-2xl font-semibold text-gray-900 mb-1">
+                  {locationMeta.name}
                 </h1>
-                <p className="text-gray-600">{locationMeta.description}</p>
+                <p className="text-sm text-gray-600">{locationMeta.description}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {locationProperties.length} {locationProperties.length === 1 ? 'property' : 'properties'} available
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {/* Mobile: Horizontal scrolling cards */}
+              <div className="lg:hidden">
+                <div
+                  className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {locationProperties.map((property) => (
+                    <div key={property.id} className="flex-none w-[45%] sm:w-[40%]">
+                      <PropertyCard
+                        property={property}
+                        onFavorite={handleFavorite}
+                        isFavorite={favorites.has(property.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop: Grid layout */}
+              <div className="hidden lg:grid grid-cols-2 xl:grid-cols-3 gap-4">
                 {locationProperties.map((property) => (
                   <PropertyCard
                     key={property.id}
