@@ -1,0 +1,76 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Search, Heart, Map, MessageCircle, User } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+interface NavItem {
+  icon: typeof Search;
+  label: string;
+  href: string;
+}
+
+const navItems: NavItem[] = [
+  { icon: Search, label: "Explore", href: "/" },
+  { icon: Heart, label: "Wishlist", href: "/wishlist" },
+  { icon: Map, label: "Map", href: "/properties/map" },
+  { icon: MessageCircle, label: "Inbox", href: "/inbox" },
+  { icon: User, label: "Profile", href: "/profile" },
+];
+
+export const MobileBottomNav = () => {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/" || pathname.startsWith("/properties");
+    }
+    return pathname.startsWith(href);
+  };
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <div className="flex items-center justify-around h-16">
+        {navItems.map((item) => {
+          const active = isActive(item.href);
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className="flex-1"
+            >
+              <motion.div
+                className="flex flex-col items-center justify-center py-2"
+                whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.1 }}
+              >
+                <Icon
+                  className={`w-6 h-6 mb-1 ${
+                    active ? "text-[#B87333]" : "text-gray-500"
+                  }`}
+                  strokeWidth={active ? 2.5 : 2}
+                />
+                <span
+                  className={`text-[10px] font-medium ${
+                    active ? "text-[#B87333]" : "text-gray-500"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </motion.div>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};

@@ -141,6 +141,7 @@ export default function PropertiesPage() {
   // Curated location sections (only show when no filters applied)
   const showLocationSections = !searchQuery && Object.keys(filters).length === 0;
 
+  // Stable location sections without date-dependent filtering to avoid hydration mismatch
   const locationSections = useMemo(() => {
     if (!showLocationSections) return [];
 
@@ -190,27 +191,9 @@ export default function PropertiesPage() {
           .slice(0, 6),
       },
       {
-        title: "Available Next Month",
-        description: "Move in soon",
-        properties: mockProperties
-          .filter(p => {
-            if (!p.availableFrom) return false;
-            const availDate = p.availableFrom instanceof Date ? p.availableFrom : new Date(p.availableFrom);
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            return availDate <= nextMonth;
-          })
-          .sort((a, b) => {
-            const dateA = a.availableFrom instanceof Date ? a.availableFrom : new Date(a.availableFrom || 0);
-            const dateB = b.availableFrom instanceof Date ? b.availableFrom : new Date(b.availableFrom || 0);
-            return dateA.getTime() - dateB.getTime();
-          })
-          .slice(0, 6),
-      },
-      {
         title: "Newly Added",
         description: "Latest properties on the market",
-        properties: mockProperties
+        properties: [...mockProperties]
           .sort((a, b) => {
             const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
             const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
@@ -223,8 +206,8 @@ export default function PropertiesPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Sticky Filter Bar */}
-      <div className="sticky top-20 z-40 bg-white border-b border-gray-200 py-4 shadow-sm">
+      {/* Sticky Filter Bar - adjusted for mobile header */}
+      <div className="sticky top-[120px] md:top-20 z-30 bg-white border-b border-gray-200 py-4 shadow-sm">
         <Container>
           <PropertyFilters
             filters={filters}
