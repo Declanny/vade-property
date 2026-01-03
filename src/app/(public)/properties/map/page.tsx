@@ -122,54 +122,73 @@ export default function PropertiesMapPage() {
   }, []);
 
   return (
-    <div className="bg-gray-50 min-h-screen pt-24">
+    <div className="bg-gray-50 min-h-screen pt-24 md:pt-24">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* 55/45 Split Layout */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Side - Scrollable Properties List (55%) */}
           <div className="w-full lg:w-[55%] space-y-6">
-            {propertiesByArea.length > 0 ? (
-              propertiesByArea.map(([area, properties]) => (
-                <div key={area} id={`area-${area}`}>
-                  {/* Area Header */}
-                  <div className="mb-4">
-                    <button
-                      onClick={() => toggleAreaCollapse(area)}
-                      className="flex items-center justify-between w-full group"
-                    >
-                      <div>
-                        <h2 className="text-xl font-bold text-gray-900 group-hover:underline">
-                          {area}
-                        </h2>
-                        <p className="text-sm text-gray-600">
-                          {properties.length} {properties.length === 1 ? 'property' : 'properties'}
-                        </p>
-                      </div>
-                      <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        {collapsedAreas.has(area) ? (
-                          <ChevronDown className="w-5 h-5 text-gray-600" />
-                        ) : (
-                          <ChevronUp className="w-5 h-5 text-gray-600" />
-                        )}
-                      </div>
-                    </button>
+            {filteredProperties.length > 0 ? (
+              <>
+                {/* Mobile: Flat grid like properties page */}
+                <div className="lg:hidden">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {filteredProperties.map((property) => (
+                      <PropertyCard
+                        key={property.id}
+                        property={property}
+                        onFavorite={handleFavorite}
+                        isFavorite={favorites.has(property.id)}
+                      />
+                    ))}
                   </div>
-
-                  {/* Properties Grid - 3 COLUMNS */}
-                  {!collapsedAreas.has(area) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
-                      {properties.map((property) => (
-                        <PropertyCard
-                          key={property.id}
-                          property={property}
-                          onFavorite={handleFavorite}
-                          isFavorite={favorites.has(property.id)}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
-              ))
+
+                {/* Desktop: Grouped by area with map */}
+                <div className="hidden lg:block space-y-6">
+                  {propertiesByArea.map(([area, properties]) => (
+                    <div key={area} id={`area-${area}`}>
+                      {/* Area Header */}
+                      <div className="mb-4">
+                        <button
+                          onClick={() => toggleAreaCollapse(area)}
+                          className="flex items-center justify-between w-full group"
+                        >
+                          <div>
+                            <h2 className="text-xl font-bold text-gray-900 group-hover:underline">
+                              {area}
+                            </h2>
+                            <p className="text-sm text-gray-600">
+                              {properties.length} {properties.length === 1 ? 'property' : 'properties'}
+                            </p>
+                          </div>
+                          <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            {collapsedAreas.has(area) ? (
+                              <ChevronDown className="w-5 h-5 text-gray-600" />
+                            ) : (
+                              <ChevronUp className="w-5 h-5 text-gray-600" />
+                            )}
+                          </div>
+                        </button>
+                      </div>
+
+                      {/* Properties Grid */}
+                      {!collapsedAreas.has(area) && (
+                        <div className="grid grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                          {properties.map((property) => (
+                            <PropertyCard
+                              key={property.id}
+                              property={property}
+                              onFavorite={handleFavorite}
+                              isFavorite={favorites.has(property.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4">🏠</div>

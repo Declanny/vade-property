@@ -206,8 +206,8 @@ export default function PropertiesPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Sticky Filter Bar - adjusted for mobile header */}
-      <div className="sticky top-[120px] md:top-20 z-30 bg-white border-b border-gray-200 py-4 shadow-sm">
+      {/* Sticky Filter Bar - hidden on mobile, shown on desktop */}
+      <div className="hidden md:block sticky top-20 z-30 bg-white border-b border-gray-200 py-4 shadow-sm">
         <Container>
           <PropertyFilters
             filters={filters}

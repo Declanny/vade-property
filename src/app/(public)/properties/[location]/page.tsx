@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, use, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
@@ -23,18 +23,27 @@ const PropertyMap = dynamic(
 );
 
 interface LocationPageProps {
-  params: {
+  params: Promise<{
     location: string;
-  };
+  }>;
 }
 
 export default function LocationPage({ params }: LocationPageProps) {
-  const { location: locationSlug } = params;
+  const { location: locationSlug } = use(params);
   const locationMeta = getLocationBySlug(locationSlug);
 
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>();
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Only show map on desktop
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   const handleFavorite = useCallback((propertyId: string) => {
     setFavorites((prev) => {
@@ -116,18 +125,20 @@ export default function LocationPage({ params }: LocationPageProps) {
               </div>
             </div>
 
-            {/* Right Side - Sticky Map (45%) */}
-            <div className="hidden lg:block lg:w-[45%]">
-              <div className="sticky top-20 h-[calc(100vh-6rem)] rounded-xl overflow-hidden shadow-lg">
-                <PropertyMap
-                  properties={locationProperties}
-                  selectedPropertyId={selectedPropertyId}
-                  hoveredPropertyId={hoveredPropertyId}
-                  onPropertyClick={handlePropertyClick}
-                  onPropertyHover={setHoveredPropertyId}
-                />
+            {/* Right Side - Sticky Map (45%) - Only render on desktop */}
+            {isDesktop && (
+              <div className="hidden lg:block lg:w-[45%]">
+                <div className="sticky top-20 h-[calc(100vh-6rem)] rounded-xl overflow-hidden shadow-lg">
+                  <PropertyMap
+                    properties={locationProperties}
+                    selectedPropertyId={selectedPropertyId}
+                    hoveredPropertyId={hoveredPropertyId}
+                    onPropertyClick={handlePropertyClick}
+                    onPropertyHover={setHoveredPropertyId}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-20">

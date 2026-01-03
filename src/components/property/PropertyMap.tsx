@@ -66,6 +66,10 @@ function MapUpdater({ center, zoom }: MapUpdaterProps) {
   const map = useMap();
 
   useEffect(() => {
+    // Validate center coordinates before flying
+    if (isNaN(center[0]) || isNaN(center[1])) {
+      return;
+    }
     map.flyTo(center, zoom, {
       duration: 0.5
     });
@@ -97,24 +101,39 @@ export default function PropertyMap({
 
   // Calculate center based on all properties
   const center: [number, number] = useMemo(() => {
+    const defaultCenter: [number, number] = [6.5244, 3.3792]; // Lagos default
+
     if (selectedPropertyId) {
       const property = properties.find(p => p.id === selectedPropertyId);
-      if (property && property.latitude && property.longitude) {
+      if (property && typeof property.latitude === 'number' && typeof property.longitude === 'number' &&
+          !isNaN(property.latitude) && !isNaN(property.longitude)) {
         return [property.latitude, property.longitude];
       }
     }
 
     if (properties.length === 0) {
-      return [6.5244, 3.3792]; // Lagos default
+      return defaultCenter;
     }
 
-    const validProperties = properties.filter(p => p.latitude !== undefined && p.longitude !== undefined);
+    const validProperties = properties.filter(p =>
+      typeof p.latitude === 'number' &&
+      typeof p.longitude === 'number' &&
+      !isNaN(p.latitude) &&
+      !isNaN(p.longitude)
+    );
+
     if (validProperties.length === 0) {
-      return [6.5244, 3.3792]; // Lagos default
+      return defaultCenter;
     }
 
-    const avgLat = validProperties.reduce((sum, p) => sum + (p.latitude || 0), 0) / validProperties.length;
-    const avgLng = validProperties.reduce((sum, p) => sum + (p.longitude || 0), 0) / validProperties.length;
+    const avgLat = validProperties.reduce((sum, p) => sum + p.latitude!, 0) / validProperties.length;
+    const avgLng = validProperties.reduce((sum, p) => sum + p.longitude!, 0) / validProperties.length;
+
+    // Final safety check
+    if (isNaN(avgLat) || isNaN(avgLng)) {
+      return defaultCenter;
+    }
+
     return [avgLat, avgLng];
   }, [properties, selectedPropertyId]);
 
@@ -122,7 +141,8 @@ export default function PropertyMap({
     return selectedPropertyId ? 14 : 11;
   }, [selectedPropertyId]);
 
-  if (!isMounted) {
+  // Don't render if not mounted or if center is invalid
+  if (!isMounted || isNaN(center[0]) || isNaN(center[1])) {
     return (
       <div className="h-full w-full bg-gray-100 flex items-center justify-center">
         <div className="text-gray-500">Loading map...</div>
