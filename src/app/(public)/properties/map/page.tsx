@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Container } from '@/components/layout/Container';
 import { PropertyCard } from '@/components/property/PropertyCard';
+import LocationSection from '@/components/property/LocationSection';
 import { mockProperties } from '@/lib/data/mock';
 import type { Property, RentalMode } from '@/lib/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -130,18 +131,18 @@ export default function PropertiesMapPage() {
           <div className="w-full lg:w-[55%] space-y-6">
             {filteredProperties.length > 0 ? (
               <>
-                {/* Mobile: Flat grid like properties page */}
+                {/* Mobile: Horizontal scrolling sections by location */}
                 <div className="lg:hidden">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {filteredProperties.map((property) => (
-                      <PropertyCard
-                        key={property.id}
-                        property={property}
-                        onFavorite={handleFavorite}
-                        isFavorite={favorites.has(property.id)}
-                      />
-                    ))}
-                  </div>
+                  {propertiesByArea.map(([area, properties]) => (
+                    <LocationSection
+                      key={area}
+                      title={area}
+                      description={`${properties.length} ${properties.length === 1 ? 'property' : 'properties'} available`}
+                      properties={properties}
+                      favorites={favorites}
+                      onFavorite={handleFavorite}
+                    />
+                  ))}
                 </div>
 
                 {/* Desktop: Grouped by area with map */}
