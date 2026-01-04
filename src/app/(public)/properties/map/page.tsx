@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Container } from '@/components/layout/Container';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import LocationSection from '@/components/property/LocationSection';
 import { mockProperties } from '@/lib/data/mock';
-import type { Property, RentalMode } from '@/lib/types';
+import type { Property } from '@/lib/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { searchParamsToFilters } from '@/lib/filters/utils';
 
 // Dynamically import map component (no SSR)
 const PropertyMap = dynamic(
@@ -60,9 +60,13 @@ function groupPropertiesByArea(properties: Property[]) {
   return groups;
 }
 
-export default function PropertiesMapPage() {
+function PropertiesMapPageContent() {
   const searchParams = useSearchParams();
-  const rentalMode = (searchParams.get("mode") as RentalMode) || "all";
+  const filters = useMemo(
+    () => searchParamsToFilters(searchParams),
+    [searchParams]
+  );
+  const rentalMode = filters.rentalMode || "all";
 
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>();
@@ -81,10 +85,40 @@ export default function PropertiesMapPage() {
     });
   }, []);
 
-  // Filter properties by rental mode
+  // Filter properties by all filters from URL
   const filteredProperties = useMemo(() => {
     let result = [...mockProperties];
 
+    // Apply filters
+    if (filters.city) {
+      result = result.filter(
+        (property) => property.city.toLowerCase() === filters.city?.toLowerCase()
+      );
+    }
+
+    if (filters.type && filters.type.length > 0) {
+      result = result.filter((property) => filters.type!.includes(property.type));
+    }
+
+    if (filters.bedrooms) {
+      result = result.filter((property) => property.bedrooms >= filters.bedrooms!);
+    }
+
+    if (filters.minPrice) {
+      result = result.filter((property) => property.price >= filters.minPrice!);
+    }
+
+    if (filters.maxPrice) {
+      result = result.filter((property) => property.price <= filters.maxPrice!);
+    }
+
+    if (filters.paymentPlans && filters.paymentPlans.length > 0) {
+      result = result.filter((property) =>
+        filters.paymentPlans!.some((plan) => property.paymentPlans.includes(plan))
+      );
+    }
+
+    // Apply rental mode filter
     if (rentalMode === "shortlet") {
       result = result.filter((property) => property.allowShortlet === true);
     } else if (rentalMode === "long_term") {
@@ -92,7 +126,7 @@ export default function PropertiesMapPage() {
     }
 
     return result;
-  }, [rentalMode]);
+  }, [filters, rentalMode]);
 
   // Group filtered properties by area
   const propertiesByArea = useMemo(() => {
@@ -218,5 +252,19 @@ export default function PropertiesMapPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PropertiesMapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+          <div className="text-gray-500">Loading map...</div>
+        </div>
+      }
+    >
+      <PropertiesMapPageContent />
+    </Suspense>
   );
 }

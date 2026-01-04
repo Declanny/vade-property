@@ -1,43 +1,57 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { PropertyFilters } from "@/components/property/PropertyFilters";
-import { Badge } from "@/components/ui/Badge";
-import { Select } from "@/components/ui/Select";
 import { mockProperties } from "@/lib/data/mock";
 import { PropertyFilters as IPropertyFilters, RentalMode } from "@/lib/types";
-import { LayoutGrid, LayoutList, MapIcon } from "lucide-react";
+import { MapIcon } from "lucide-react";
 import Link from "next/link";
 import LocationSection from "@/components/property/LocationSection";
 import { detectLocationFromAddress } from "@/lib/data/locations";
+import {
+  searchParamsToFilters,
+  filtersToSearchParams,
+} from "@/lib/filters/utils";
 
-export default function PropertiesPage() {
+function PropertiesPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [filters, setFilters] = useState<IPropertyFilters>({});
+  // Read filters from URL
+  const urlFilters = useMemo(
+    () => searchParamsToFilters(searchParams),
+    [searchParams]
+  );
+
+  const [localFilters, setLocalFilters] = useState<IPropertyFilters>(urlFilters);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"price_asc" | "price_desc" | "rating" | "newest">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [rentalMode, setRentalMode] = useState<RentalMode>(
-    (searchParams.get("mode") as RentalMode) || "all"
-  );
 
-  // Handle rental mode change and update URL
-  const handleRentalModeChange = (mode: RentalMode) => {
-    setRentalMode(mode);
-    const params = new URLSearchParams(searchParams.toString());
-    if (mode === "all") {
-      params.delete("mode");
-    } else {
-      params.set("mode", mode);
-    }
-    const newUrl = params.toString() ? `/properties?${params.toString()}` : "/properties";
+  // Sync local filters with URL when URL changes (e.g., from mobile filter drawer)
+  useEffect(() => {
+    setLocalFilters(urlFilters);
+  }, [urlFilters]);
+
+  const rentalMode = urlFilters.rentalMode || "all";
+
+  // Handle filter changes from desktop filter bar (update URL)
+  const handleFiltersChange = (newFilters: IPropertyFilters) => {
+    setLocalFilters(newFilters);
+    const params = filtersToSearchParams(newFilters);
+    const newUrl = params.toString()
+      ? `/properties?${params.toString()}`
+      : "/properties";
     router.push(newUrl, { scroll: false });
+  };
+
+  // Handle rental mode change
+  const handleRentalModeChange = (mode: RentalMode) => {
+    handleFiltersChange({ ...localFilters, rentalMode: mode });
   };
 
   const handleFavorite = (propertyId: string) => {
@@ -69,39 +83,39 @@ export default function PropertiesPage() {
     }
 
     // Apply filters
-    if (filters.city) {
+    if (localFilters.city) {
       result = result.filter(
-        (property) => property.city.toLowerCase() === filters.city?.toLowerCase()
+        (property) => property.city.toLowerCase() === localFilters.city?.toLowerCase()
       );
     }
 
-    if (filters.type && filters.type.length > 0) {
-      result = result.filter((property) => filters.type!.includes(property.type));
+    if (localFilters.type && localFilters.type.length > 0) {
+      result = result.filter((property) => localFilters.type!.includes(property.type));
     }
 
-    if (filters.bedrooms) {
-      result = result.filter((property) => property.bedrooms >= filters.bedrooms!);
+    if (localFilters.bedrooms) {
+      result = result.filter((property) => property.bedrooms >= localFilters.bedrooms!);
     }
 
-    if (filters.bathrooms) {
-      result = result.filter((property) => property.bathrooms >= filters.bathrooms!);
+    if (localFilters.bathrooms) {
+      result = result.filter((property) => property.bathrooms >= localFilters.bathrooms!);
     }
 
-    if (filters.minPrice) {
-      result = result.filter((property) => property.price >= filters.minPrice!);
+    if (localFilters.minPrice) {
+      result = result.filter((property) => property.price >= localFilters.minPrice!);
     }
 
-    if (filters.maxPrice) {
-      result = result.filter((property) => property.price <= filters.maxPrice!);
+    if (localFilters.maxPrice) {
+      result = result.filter((property) => property.price <= localFilters.maxPrice!);
     }
 
-    if (filters.paymentPlans && filters.paymentPlans.length > 0) {
+    if (localFilters.paymentPlans && localFilters.paymentPlans.length > 0) {
       result = result.filter((property) =>
-        filters.paymentPlans!.some((plan) => property.paymentPlans.includes(plan))
+        localFilters.paymentPlans!.some((plan) => property.paymentPlans.includes(plan))
       );
     }
 
-    if (filters.verifiedOnly) {
+    if (localFilters.verifiedOnly) {
       result = result.filter((property) => property.verified);
     }
 
@@ -129,7 +143,7 @@ export default function PropertiesPage() {
     }
 
     return result;
-  }, [filters, searchQuery, sortBy, rentalMode]);
+  }, [localFilters, searchQuery, sortBy, rentalMode]);
 
   const sortOptions = [
     { value: "newest", label: "Newest First" },
@@ -139,7 +153,8 @@ export default function PropertiesPage() {
   ];
 
   // Curated location sections (only show when no filters applied)
-  const showLocationSections = !searchQuery && Object.keys(filters).length === 0;
+  const hasActiveFilters = localFilters.city || localFilters.type?.length || localFilters.bedrooms || localFilters.minPrice || localFilters.maxPrice || localFilters.paymentPlans?.length;
+  const showLocationSections = !searchQuery && !hasActiveFilters;
 
   // Stable location sections without date-dependent filtering to avoid hydration mismatch
   const locationSections = useMemo(() => {
@@ -210,8 +225,8 @@ export default function PropertiesPage() {
       <div className="hidden md:block sticky top-20 z-30 bg-white border-b border-gray-200 py-4 shadow-sm">
         <Container>
           <PropertyFilters
-            filters={filters}
-            onFiltersChange={setFilters}
+            filters={localFilters}
+            onFiltersChange={handleFiltersChange}
             onSearch={setSearchQuery}
             rentalMode={rentalMode}
             onRentalModeChange={handleRentalModeChange}
@@ -308,7 +323,7 @@ export default function PropertiesPage() {
             </p>
             <button
               onClick={() => {
-                setFilters({});
+                handleFiltersChange({});
                 setSearchQuery("");
               }}
               className="text-primary hover:text-primary-light font-medium underline"
@@ -319,5 +334,19 @@ export default function PropertiesPage() {
         )}
       </Container>
     </div>
+  );
+}
+
+export default function PropertiesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+          <div className="text-gray-500">Loading...</div>
+        </div>
+      }
+    >
+      <PropertiesPageContent />
+    </Suspense>
   );
 }
