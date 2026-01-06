@@ -30,11 +30,11 @@ export default function Home() {
 
         <FeaturedProperties />
         <WhyChooseUs />
+      </div>
 
-        {/* Footer - hidden on mobile */}
-        <div className="hidden md:block">
-          <Footer />
-        </div>
+      {/* Footer - hidden on mobile */}
+      <div className="hidden md:block">
+        <Footer />
       </div>
 
       {/* Mobile Bottom Navigation */}

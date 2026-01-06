@@ -28,7 +28,7 @@ const footerLinks = {
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="relative overflow-hidden" style={{ backgroundColor: '#0B3D2C' }}>
+    <footer className="relative overflow-hidden" style={{ backgroundColor: '#D4F1E8' }}>
       {/* Decorative Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
@@ -51,10 +51,10 @@ export const Footer: React.FC = () => {
             className="lg:col-span-1"
           >
             <h3 className="font-serif font-bold text-3xl mb-4">
-              <span className="text-white">Tru</span>
+              <span className="text-gray-900">Tru</span>
               <span style={{ color: '#B87333' }}>Vade</span>
             </h3>
-            <p className="text-white/80 mb-6 leading-relaxed text-sm">
+            <p className="text-gray-700 mb-6 leading-relaxed text-sm">
               Your trusted platform for secure, lawyer-verified property rentals in Nigeria.
             </p>
 
@@ -71,9 +71,9 @@ export const Footer: React.FC = () => {
                   href={href}
                   whileHover={{ scale: 1.1, backgroundColor: '#B87333' }}
                   whileTap={{ scale: 0.9 }}
-                  className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
+                  className="w-10 h-10 bg-gray-900/10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
                 >
-                  <Icon className="w-4 h-4 text-white" />
+                  <Icon className="w-4 h-4 text-gray-900" />
                 </motion.a>
               ))}
             </div>
@@ -92,7 +92,7 @@ export const Footer: React.FC = () => {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 hover:text-white text-sm transition-colors inline-block hover:translate-x-1 transform duration-200"
+                    className="text-gray-600 hover:text-gray-900 text-sm transition-colors inline-block hover:translate-x-1 transform duration-200"
                   >
                     {link.name}
                   </Link>
@@ -114,7 +114,7 @@ export const Footer: React.FC = () => {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 hover:text-white text-sm transition-colors inline-block hover:translate-x-1 transform duration-200"
+                    className="text-gray-600 hover:text-gray-900 text-sm transition-colors inline-block hover:translate-x-1 transform duration-200"
                   >
                     {link.name}
                   </Link>
@@ -136,7 +136,7 @@ export const Footer: React.FC = () => {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 hover:text-white text-sm transition-colors inline-block hover:translate-x-1 transform duration-200"
+                    className="text-gray-600 hover:text-gray-900 text-sm transition-colors inline-block hover:translate-x-1 transform duration-200"
                   >
                     {link.name}
                   </Link>
@@ -152,7 +152,7 @@ export const Footer: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          className="border-t border-white/10 pt-8 mb-8"
+          className="border-t border-gray-300 pt-8 mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center">
@@ -160,8 +160,8 @@ export const Footer: React.FC = () => {
                 <Phone className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-white/50 text-xs">Call us</p>
-                <a href="tel:+2348012345678" className="text-white text-sm hover:text-white/80 transition-colors">
+                <p className="text-gray-500 text-xs">Call us</p>
+                <a href="tel:+2348012345678" className="text-gray-900 text-sm hover:text-gray-700 transition-colors">
                   +234 801 234 5678
                 </a>
               </div>
@@ -172,8 +172,8 @@ export const Footer: React.FC = () => {
                 <Mail className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-white/50 text-xs">Email us</p>
-                <a href="mailto:info@truvade.com" className="text-white text-sm hover:text-white/80 transition-colors">
+                <p className="text-gray-500 text-xs">Email us</p>
+                <a href="mailto:info@truvade.com" className="text-gray-900 text-sm hover:text-gray-700 transition-colors">
                   info@truvade.com
                 </a>
               </div>
@@ -184,8 +184,8 @@ export const Footer: React.FC = () => {
                 <MapPin className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-white/50 text-xs">Visit us</p>
-                <span className="text-white text-sm">Marina Road, Lagos Island</span>
+                <p className="text-gray-500 text-xs">Visit us</p>
+                <span className="text-gray-900 text-sm">Marina Road, Lagos Island</span>
               </div>
             </div>
           </div>

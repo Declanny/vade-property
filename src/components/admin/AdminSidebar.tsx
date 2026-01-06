@@ -13,7 +13,8 @@ import {
   Settings,
   HomeIcon,
   BarChart3,
-  CalendarDays
+  CalendarDays,
+  UserCog,
 } from 'lucide-react';
 
 const navigation = [
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Property Owners', href: '/admin/owners', icon: Building2 },
   { name: 'Properties', href: '/admin/properties', icon: HomeIcon },
   { name: 'Shortlets', href: '/admin/shortlets', icon: CalendarDays },
+  { name: 'Staff', href: '/admin/staff', icon: UserCog },
   { name: 'Tenants', href: '/admin/tenants', icon: Users },
   { name: 'KYC Review', href: '/admin/kyc', icon: UserCheck, badge: 'pending' },
   { name: 'Payments', href: '/admin/payments', icon: CreditCard },
