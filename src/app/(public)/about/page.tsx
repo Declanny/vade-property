@@ -169,14 +169,14 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section
         className="py-20"
-        style={{ background: "linear-gradient(to right, var(--color-primary-dark) 0%, var(--color-primary) 15%, var(--color-primary) 85%, var(--color-primary-dark) 100%)" }}
+        style={{ backgroundColor: '#D4F1E8' }}
       >
         <Container>
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Ready to Find Your Perfect Home?
             </h2>
-            <p className="text-xl text-gray-100 mb-8">
+            <p className="text-xl text-gray-700 mb-8">
               Join thousands of satisfied tenants who found their homes through our lawyer-verified platform
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

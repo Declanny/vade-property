@@ -1,6 +1,3 @@
-"use client";
-
-import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -11,17 +8,12 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isPropertiesPage = pathname?.startsWith("/properties");
-
   return (
     <>
-      {/* Desktop Header - hidden on mobile and on properties pages */}
-      {!isPropertiesPage && (
-        <div className="hidden md:block">
-          <Header />
-        </div>
-      )}
+      {/* Desktop Header - hidden on mobile */}
+      <div className="hidden md:block">
+        <Header />
+      </div>
 
       {/* Mobile Header with Filter Drawer */}
       <MobileHeader />
